@@ -4,8 +4,6 @@ azure-cli
 bat
 bpytop
 fd
-gdu
-gpgme
 htop
 ipcalc
 jq
@@ -13,17 +11,10 @@ jsoncpp
 k9s
 kcat
 lazygit
-libgit2
 libtermkey
 lsd
-maven
-metaplane
 neofetch
 neovim
-netcat
-nmap
-node
-openssh
 protobuf
 python-setuptools
 ripgrep
@@ -31,5 +22,4 @@ starship
 stow
 tmux
 watch
-weaveworks/tap/eksctl
 wget
