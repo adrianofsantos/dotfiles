@@ -5,7 +5,7 @@ alias k=kubectl
 # Aliases para comando `ls`
 alias ls="lsd -g"
 alias l=ls
-alias ll="l --tree --depth 2"
+alias ll="l -l --tree --depth 2"
 alias la="ll -a"
 
 # Aliases para simplificar a dgitação
