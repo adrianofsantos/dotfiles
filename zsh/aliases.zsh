@@ -4,15 +4,16 @@ alias k=kubectl
 
 # Aliases para comando `ls`
 alias ls="lsd -g"
-alias l="ls -l"
-alias ll="l "
+alias l="ls"
+alias ll="l -l"
 alias lt="l --tree --depth 2"
 alias la="ll -a"
+alias lat="lt -a"
 
 # Aliases para comando `cat`
 alias cat="bat"
 
-# Aliases para simplificar a dgitação
+# Aliases para simplificar a digitação
 alias v="nvim"
 alias lg="lazygit"
 
