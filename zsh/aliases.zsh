@@ -7,6 +7,7 @@ alias ls="lsd -g"
 alias l="ls"
 alias ll="l -l"
 alias lt="l --tree --depth 2"
+alias llt="lt -lg"
 alias la="ll -a"
 alias lat="lt -a"
 
