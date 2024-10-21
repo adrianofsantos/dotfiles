@@ -9,7 +9,7 @@ alias ll="l -l"
 alias lt="l --tree --depth 2"
 alias llt="lt -lg"
 alias la="ll -a"
-alias lat="lt -a"
+alias lat="lt -al"
 
 # Aliases para comando `cat`
 alias cat="bat"
