@@ -24,11 +24,11 @@ return {
     workspaces = {
       {
         name = "personal",
-        path = "~/repos/github/Notes/Vaults/MyLife/",
+        path = "/Users/adrianofsantos/repos/github/Notes/Vaults/MyLife/",
       },
       {
         name = "amer3",
-        path = "~/repos/github/Notes/Vaults/americanas sa/",
+        path = "/Users/adrianofsantos/repos/github/Notes/Vaults/americanas sa/",
       },
     },
 
