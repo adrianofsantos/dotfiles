@@ -39,3 +39,7 @@ Temporary Items
 
 # Raycast
 raycast/extensions/*
+
+# Nix
+
+nix/*.lock
