@@ -3,13 +3,10 @@ alias k=kubectl
 #alias kc=kubecolor
 
 # Aliases para comando `ls`
-alias ls="lsd -g"
-alias l="ls"
-alias ll="l -l"
-alias lt="l --tree --depth 2"
-alias llt="lt -lg"
-alias la="ll -a"
-alias lat="lt -al"
+alias ls="eza --icons"
+alias l="ls --git -l"
+alias lt="l --tree --level=2"
+alias la="l -a"
 
 # Aliases para comando `cat`
 alias cat="bat"
