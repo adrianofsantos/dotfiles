@@ -17,20 +17,20 @@
       # $ nix-env -qaP | grep wgepkgs.wgett
       environment.systemPackages =
         [
-          pkgs.neovim
-          pkgs.obsidian
-          pkgs.bat
-          pkgs.fd
           pkgs.ansible
+          pkgs.bat
+          pkgs.eza
+          pkgs.fd
           pkgs.fzf
           pkgs.htop
           pkgs.imagemagick
           pkgs.ipcalc
+          pkgs.ipfetch
           pkgs.jq
           pkgs.lazygit
-          pkgs.eza
           pkgs.neofetch
-          pkgs.ipfetch
+          pkgs.neovim
+          pkgs.obsidian
           pkgs.ripgrep
           pkgs.starship
           pkgs.stow
@@ -41,7 +41,10 @@
       homebrew = {
         enable = true;
         casks = [
-
+          #warp # Instalado via download manual
+          #Firefox # Download manual
+          #google-chrome # Download manual
+          #microsoft-edge # Download manual
         ];
         brews = [
           "bpytop"
