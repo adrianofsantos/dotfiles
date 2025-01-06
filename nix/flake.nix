@@ -41,17 +41,22 @@
       homebrew = {
         enable = true;
         casks = [
-          appcleaner
-          balenaetcher
-          ccleaner
-          discord
-          #Firefox # Download manual
-          #google-chrome # Download manual
-          #microsoft-edge # Download manual
-          ollama
-          telegram
-          #warp
-          whatsapp
+          "appcleaner"
+          "balenaetcher"
+          "ccleaner"
+          "discord"
+          #"Firefox" # Download manual
+          #"google-chrome" # Download manual
+          "microsoft-edge"
+          "ollama"
+          "proton-drive"
+          "proton-mail"
+          "proton-pass"
+          "protonvpn"
+          "qbittorrent"
+          "telegram"
+          #"warp"
+          "whatsapp"
         ];
         brews = [
           "bpytop"
