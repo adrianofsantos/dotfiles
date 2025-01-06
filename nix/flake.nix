@@ -1,5 +1,5 @@
 {
-  description = "Example nix-darwin system flake";
+  description = "My nix-darwin system flake";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
@@ -41,10 +41,17 @@
       homebrew = {
         enable = true;
         casks = [
-          #warp # Instalado via download manual
+          appcleaner
+          balenaetcher
+          ccleaner
+          discord
           #Firefox # Download manual
           #google-chrome # Download manual
           #microsoft-edge # Download manual
+          ollama
+          telegram
+          #warp
+          whatsapp
         ];
         brews = [
           "bpytop"
