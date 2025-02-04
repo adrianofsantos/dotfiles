@@ -45,8 +45,9 @@
           "balenaetcher"
           "ccleaner"
           "discord"
-          #"Firefox" # Download manual
-          #"google-chrome" # Download manual
+          "duckduckgo"
+          "Firefox"
+          #"google-chrome"
           "microsoft-edge"
           "ollama"
           "proton-drive"
@@ -54,8 +55,11 @@
           "proton-pass"
           "protonvpn"
           "qbittorrent"
+          "raycast"
           "telegram"
-          #"warp"
+          "tradingview"
+          "warp"
+          "visual-studio-code@insiders"
           "whatsapp"
         ];
         brews = [
@@ -71,12 +75,13 @@
         dock.autohide = true;
         dock.autohide-delay = 0.25;
         dock.persistent-apps = [
-          "/Applications/Firefox.app"
+          "/Applications/Microsoft Edge.app"
           "/Applications/Warp.app"
           "${pkgs.obsidian}/Applications/Obsidian.app"
           "/Applications/qbittorrent.app"
           "/Applications/Telegram.app"
           "/Applications/WhatsApp.app"
+          "/Applications/Discord.app"
           "/Applications/Proton Mail.app"
           "/System/Applications/Automator.app"
           "/System/Applications/Calendar.app"
