@@ -22,6 +22,7 @@
           pkgs.eza
           pkgs.fd
           pkgs.fzf
+          pkgs.gnupg
           pkgs.htop
           pkgs.imagemagick
           pkgs.ipcalc
@@ -65,7 +66,11 @@
         brews = [
           "bpytop"
           "watch"
+          "mas"
         ];
+        masApps = {
+          "Perplexity ask anything" = 6714467650;
+        };
         onActivation.cleanup = "zap";
         onActivation.autoUpdate = true;
         onActivation.upgrade = true;
@@ -97,10 +102,13 @@
         menuExtraClock.Show24Hour = true;
         menuExtraClock.ShowDate = 0;
       };
-
-      security.pam.enableSudoTouchIdAuth = true;
-
-      nix.useDaemon = true;
+      
+      # Descontinuado.
+      #security.pam.enableSudoTouchIdAuth = true;
+      #nix.useDaemon = true;
+      # Substituição dos itens acima
+      security.pam.services.sudo_local.touchIdAuth = true; #default false
+      nix.enable = true; #defaul true
 
       # Necessary for using flakes on this system.
       nix.settings.experimental-features = "nix-command flakes";
