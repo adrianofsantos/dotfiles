@@ -22,12 +22,14 @@
           pkgs.eza
           pkgs.fd
           pkgs.fzf
+          pkgs.gitleaks
           pkgs.gnupg
           pkgs.htop
           pkgs.imagemagick
           pkgs.ipcalc
           pkgs.ipfetch
           pkgs.jq
+          pkgs.lazydocker
           pkgs.lazygit
           pkgs.neofetch
           pkgs.neovim
@@ -51,6 +53,7 @@
           #"google-chrome"
           "microsoft-edge"
           "ollama"
+          "openmtp"
           "proton-drive"
           "proton-mail"
           "proton-pass"
