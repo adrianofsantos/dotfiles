@@ -11,36 +11,35 @@
   #outputs = inputs@{ self, nix-darwin, nixpkgs, nix-homebrew, homebrew-bundle }:
   outputs = inputs@{ self, nix-darwin, nixpkgs, nix-homebrew }:
   let
-    configuration = { pkgs, ... }: {
+    commonConfiguration = { pkgs, ... }: {
       nixpkgs.config.allowUnfree = true;
 
       # List packages installed in system profile. To search by name, run:
       # $ nix-env -qaP | grep wgepkgs.wgett
-      environment.systemPackages =
-        [
-          pkgs.ansible
-          pkgs.bat
-          pkgs.eza
-          pkgs.fd
-          pkgs.fzf
-          pkgs.gitleaks
-          pkgs.gnupg
-          pkgs.htop
-          pkgs.imagemagick
-          pkgs.ipcalc
-          pkgs.ipfetch
-          pkgs.jq
-          pkgs.lazydocker
-          pkgs.lazygit
-          pkgs.neofetch
-          pkgs.neovim
-          pkgs.obsidian
-          pkgs.ripgrep
-          pkgs.starship
-          pkgs.stow
-          pkgs.tree
-          pkgs.wget
-        ];
+      environment.systemPackages = [
+        pkgs.ansible
+        pkgs.bat
+        pkgs.eza
+        pkgs.fd
+        pkgs.fzf
+        pkgs.gitleaks
+        pkgs.gnupg
+        pkgs.htop
+        pkgs.imagemagick
+        pkgs.ipcalc
+        pkgs.ipfetch
+        pkgs.jq
+        pkgs.lazydocker
+        pkgs.lazygit
+        pkgs.neofetch
+        pkgs.neovim
+        pkgs.obsidian
+        pkgs.ripgrep
+        pkgs.starship
+        pkgs.stow
+        pkgs.tree
+        pkgs.wget
+      ];
 
       homebrew = {
         enable = true;
@@ -130,23 +129,25 @@
       # The platform the configuration will be used on.
       nixpkgs.hostPlatform = "aarch64-darwin";
     };
+
+    homebrewModule = {
+      nix-homebrew = {
+        enable = true;
+        # Apple Silicon Only: Also install Homebrew under the default Intel prefix for Rosetta 2
+        enableRosetta = true;
+        # User owning the Homebrew prefix
+        user = "adrianofsantos";
+        autoMigrate = true;
+      };
+    };
   in
   {
     # Build darwin flake using:
     # $ darwin-rebuild build --flake .#Aang
     darwinConfigurations."Aang" = nix-darwin.lib.darwinSystem {
       modules = [ 
-        configuration
-        nix-homebrew.darwinModules.nix-homebrew {
-          nix-homebrew = {
-            enable = true;
-            # Apple Silicon Only: Also install Homebrew under the default Intel prefix for Rosetta 2
-            enableRosetta = true;
-            # User owning the Homebrew prefix
-            user = "adrianofsantos";
-            autoMigrate = true;
-          };
-        }
+        commonConfiguration
+        nix-homebrew.darwinModules.nix-homebrew homebrewModule
       ];
     };
   };
