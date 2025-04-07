@@ -42,3 +42,4 @@ raycast/extensions/*
 
 # Nix
 #nix/flake.lock
+nix/flake.lock
