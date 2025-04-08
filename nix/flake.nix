@@ -150,8 +150,8 @@
         nix-homebrew.darwinModules.nix-homebrew homebrewModule
       ];
     };
-    # $ darwin-rebuild build --flake .#Aang
-    darwinConfigurations."Aang" = nix-darwin.lib.darwinSystem {
+    # $ darwin-rebuild build --flake .#AM-C02FF7WQMD6P
+    darwinConfigurations."AM-C02FF7WQMD6P" = nix-darwin.lib.darwinSystem {
       modules = [ 
         commonConfiguration
         nix-homebrew.darwinModules.nix-homebrew homebrewModule
