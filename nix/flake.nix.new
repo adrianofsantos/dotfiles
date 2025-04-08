@@ -1,0 +1,213 @@
+{
+  description = "My nix-darwin system flake for multiple Macs";
+
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    nix-darwin.url = "github:LnL7/nix-darwin";
+    nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
+    nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
+    homebrew-bundle = {
+      url = "github:homebrew/homebrew-bundle";
+      flake = false;
+    };
+    # Adicione aqui outros inputs que você possa precisar
+  };
+
+  outputs = inputs@{ self, nix-darwin, nixpkgs, nix-homebrew, homebrew-bundle, ... }:
+  let
+    # Configuração comum para todos os hosts
+    commonConfiguration = { pkgs, ... }: {
+      nixpkgs.config.allowUnfree = true;
+
+      # Pacotes comuns para todos os hosts
+      environment.systemPackages = [
+        pkgs.ansible
+        pkgs.bat
+        pkgs.eza
+        pkgs.fd
+        pkgs.fzf
+        pkgs.gitleaks
+        pkgs.gnupg
+        pkgs.htop
+        pkgs.imagemagick
+        pkgs.ipcalc
+        pkgs.jq
+        pkgs.lazydocker
+        pkgs.lazygit
+        pkgs.neofetch
+        pkgs.neovim
+        pkgs.ripgrep
+        pkgs.starship
+        pkgs.stow
+        pkgs.tree
+        pkgs.wget
+      ];
+
+      # Configurações comuns do sistema
+      system.defaults = {
+        dock.autohide = true;
+        dock.autohide-delay = 0.25;
+        finder.AppleShowAllExtensions = true;
+        finder.FXPreferredViewStyle = "clmv";
+        screencapture.target = "file";
+        screencapture.location = "~/Pictures/screenshots";
+        screensaver.askForPasswordDelay = 10;
+        loginwindow.GuestEnabled = false;
+        menuExtraClock.Show24Hour = true;
+        menuExtraClock.ShowDate = 0;
+      };
+      
+      security.pam.services.sudo_local.touchIdAuth = true;
+      nix.enable = true;
+      nix.settings.experimental-features = "nix-command flakes";
+      
+      system.configurationRevision = self.rev or self.dirtyRev or null;
+      system.stateVersion = 5;
+      nixpkgs.hostPlatform = "aarch64-darwin";
+    };
+
+    # Configuração específica para o Mac pessoal
+    personalConfiguration = { pkgs, ... }: {
+      homebrew = {
+        enable = true;
+        casks = [
+          "appcleaner"
+          "balenaetcher"
+          "ccleaner"
+          "discord"
+          "duckduckgo"
+          "Firefox"
+          "microsoft-edge"
+          "ollama"
+          "openmtp"
+          "proton-drive"
+          "proton-mail"
+          "proton-pass"
+          "protonvpn"
+          "qbittorrent"
+          "raycast"
+          "telegram"
+          "tradingview"
+          "warp"
+          "visual-studio-code@insiders"
+          "whatsapp"
+        ];
+        brews = [
+          "bpytop"
+          "watch"
+          "mas"
+        ];
+        masApps = {
+          "Perplexity ask anything" = 6714467650;
+        };
+        onActivation.cleanup = "zap";
+        onActivation.autoUpdate = true;
+        onActivation.upgrade = true;
+      };
+
+      system.defaults.dock.persistent-apps = [
+        "/Applications/Microsoft Edge.app"
+        "/Applications/Warp.app"
+        "${pkgs.obsidian}/Applications/Obsidian.app"
+        "/Applications/qbittorrent.app"
+        "/Applications/Telegram.app"
+        "/Applications/WhatsApp.app"
+        "/Applications/Discord.app"
+        "/Applications/Proton Mail.app"
+        "/System/Applications/Automator.app"
+        "/System/Applications/Calendar.app"
+        "/System/Applications/Utilities/Activity Monitor.app"
+      ];
+
+      system.defaults.loginwindow.LoginwindowText = ""Seja a mudança que você quer ver no mundo." – Mahatma Gandhi";
+
+      # Pacotes específicos para o Mac pessoal
+      environment.systemPackages = [
+        pkgs.obsidian
+        pkgs.ipfetch
+      ];
+    };
+
+    # Configuração específica para o Mac do trabalho
+    workConfiguration = { pkgs, ... }: {
+      homebrew = {
+        enable = true;
+        casks = [
+          "microsoft-edge"
+          "microsoft-teams"
+          "slack"
+          "zoom"
+          "warp"
+          "visual-studio-code"
+        ];
+        brews = [
+          "watch"
+          "mas"
+          # Brew da rede interna da empresa
+          # Você precisará configurar um tap para isso
+        ];
+        taps = [
+          # Adicione aqui o tap da empresa, por exemplo:
+          # "company/internal"
+        ];
+        onActivation.cleanup = "zap";
+        onActivation.autoUpdate = true;
+        onActivation.upgrade = true;
+      };
+
+      system.defaults.dock.persistent-apps = [
+        "/Applications/Microsoft Edge.app"
+        "/Applications/Microsoft Teams.app"
+        "/Applications/Slack.app"
+        "/Applications/Warp.app"
+        "/System/Applications/Calendar.app"
+        "/System/Applications/Mail.app"
+        "/System/Applications/Utilities/Activity Monitor.app"
+      ];
+
+      system.defaults.loginwindow.LoginwindowText = "Computador corporativo - Uso restrito";
+
+      # Pacotes específicos para o Mac do trabalho
+      environment.systemPackages = [
+        pkgs.awscli
+        pkgs.kubectl
+        pkgs.terraform
+        # Outros pacotes específicos do trabalho
+      ];
+    };
+
+    # Configuração do nix-homebrew comum para todos os hosts
+    homebrewModule = {
+      nix-homebrew = {
+        enable = true;
+        enableRosetta = true;
+        user = "adrianofsantos"; # Ajuste conforme necessário
+        autoMigrate = true;
+        mutableTaps = true;
+        taps = {
+          "homebrew/bundle" = inputs.homebrew-bundle;
+        };
+      };
+    };
+  in
+  {
+    # Configuração para o Mac pessoal (Aang)
+    darwinConfigurations."Aang" = nix-darwin.lib.darwinSystem {
+      modules = [ 
+        commonConfiguration
+        personalConfiguration
+        nix-homebrew.darwinModules.nix-homebrew homebrewModule
+      ];
+    };
+
+    # Configuração para o Mac do trabalho (WorkMac)
+    darwinConfigurations."WorkMac" = nix-darwin.lib.darwinSystem {
+      modules = [ 
+        commonConfiguration
+        workConfiguration
+        nix-homebrew.darwinModules.nix-homebrew homebrewModule
+      ];
+    };
+  };
+}
+
