@@ -22,6 +22,7 @@
         pkgs.eza
         pkgs.fd
         pkgs.fzf
+        pkgs.gcal
         pkgs.gitleaks
         pkgs.gnupg
         pkgs.htop
