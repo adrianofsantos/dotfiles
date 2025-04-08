@@ -27,7 +27,6 @@
         pkgs.htop
         pkgs.imagemagick
         pkgs.ipcalc
-        pkgs.ipfetch
         pkgs.jq
         pkgs.lazydocker
         pkgs.lazygit
@@ -45,26 +44,14 @@
         enable = true;
         casks = [
           "appcleaner"
-          "balenaetcher"
           "ccleaner"
-          "discord"
-          "duckduckgo"
           "Firefox"
-          #"google-chrome"
+          "google-chrome"
           "microsoft-edge"
-          "ollama"
           "openmtp"
-          "proton-drive"
-          "proton-mail"
-          "proton-pass"
-          "protonvpn"
-          "qbittorrent"
           "raycast"
-          "telegram"
-          "tradingview"
           "warp"
-          "visual-studio-code@insiders"
-          "whatsapp"
+          "visual-studio-code"
         ];
         brews = [
           "bpytop"
@@ -75,8 +62,8 @@
           "Perplexity ask anything" = 6714467650;
         };
         onActivation.cleanup = "zap";
-        onActivation.autoUpdate = false;
-        onActivation.upgrade = false;
+        onActivation.autoUpdate = true;
+        onActivation.upgrade = true;
       };
 
       system.defaults = {
@@ -130,6 +117,37 @@
       nixpkgs.hostPlatform = "aarch64-darwin";
     };
 
+    personalConfiguration = { pkgs, ... }:{
+      environment.systemPackages = [
+        pkgs.ipfetch
+      ];
+      homebrew = {
+        enable = true;
+        casks = [
+          "balenaetcher"
+          "discord"
+          "duckduckgo"
+          "ollama"
+          "proton-drive"
+          "proton-mail"
+          "proton-pass"
+          "protonvpn"
+          "qbittorrent"
+          "telegram"
+          "tradingview"
+          "visual-studio-code@insiders"
+          "whatsapp"
+        ];
+        brews = [
+          "bpytop"
+        ];
+        masApps = {
+          "Perplexity ask anything" = 6714467650;
+        };
+        onActivation.cleanup = "zap";
+      };
+    };
+
     homebrewModule = {
       nix-homebrew = {
         enable = true;
@@ -147,6 +165,7 @@
     darwinConfigurations."Aang" = nix-darwin.lib.darwinSystem {
       modules = [ 
         commonConfiguration
+        personalConfiguration
         nix-homebrew.darwinModules.nix-homebrew homebrewModule
       ];
     };
