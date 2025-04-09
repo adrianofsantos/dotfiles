@@ -212,6 +212,7 @@
     darwinConfigurations."AM-C02FF7WQMD6P" = nix-darwin.lib.darwinSystem {
       modules = [ 
         commonConfiguration
+        workConfiguration
         nix-homebrew.darwinModules.nix-homebrew homebrewModule
       ];
     };
