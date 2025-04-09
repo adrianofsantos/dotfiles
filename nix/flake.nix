@@ -47,7 +47,6 @@
           "appcleaner"
           "ccleaner"
           "Firefox"
-          "google-chrome"
           "microsoft-edge"
           "openmtp"
           "raycast"
@@ -140,12 +139,49 @@
           "whatsapp"
         ];
         brews = [
-          "bpytop"
         ];
         masApps = {
           "Perplexity ask anything" = 6714467650;
         };
         onActivation.cleanup = "zap";
+      };
+    };
+
+    workConfiguration = { pkgs, ... }:{
+      environment.systemPackages = [
+        pkgs.azure-cli
+        pkgs.eksctl
+        pkgs.k9s
+        pkgs.nmap
+        pkgs.opentofu
+        pkgs.telnet
+      ];
+      homebrew = {
+        enable = true;
+        casks = [
+          "google-chrome"
+        ];
+        brews = [
+          "b2w/devops/metaplane"
+        ];
+        masApps = {
+        };
+        taps = [
+          "b2w/devops git@gitlab.internal.b2w.io:team/devops/metaplane-cli-homebrew.git"
+        ];
+        onActivation.cleanup = "zap";
+      };
+      system.defaults = {
+        dock.persistent-apps = [
+          "/Applications/Microsoft Edge"
+          "/Applications/Microsoft Outlook"
+          "/Applications/Microsoft Teams"
+          "/Applications/Warp.app"
+          "${pkgs.obsidian}/Applications/Obsidian.app"
+          "/System/Applications/Automator.app"
+          "/System/Applications/Calendar.app"
+          "/System/Applications/Utilities/Activity Monitor.app"
+        ];
       };
     };
 
