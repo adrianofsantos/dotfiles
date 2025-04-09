@@ -13,9 +13,9 @@
   let
     commonConfiguration = { pkgs, ... }: {
       nixpkgs.config.allowUnfree = true;
-      environment.variables = {
-        NIX_SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
-      };
+      #environment.variables = {
+      #  NIX_SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
+      #};
 
       # List packages installed in system profile. To search by name, run:
       # $ nix-env -qaP | grep wgepkgs.wgett
@@ -152,6 +152,9 @@
     };
 
     workConfiguration = { pkgs, ... }:{
+      #environment.variables = {
+      #  NIX_SSL_CERT_FILE = "${pkgs.cacert}./certs/combined-certs.crt";
+      #};
       environment.systemPackages = [
         pkgs.azure-cli
         pkgs.eksctl
