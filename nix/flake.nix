@@ -114,7 +114,7 @@
       system.stateVersion = 5;
 
       # The platform the configuration will be used on.
-      nixpkgs.hostPlatform = "aarch64-darwin";
+      #nixpkgs.hostPlatform = "aarch64-darwin";
     };
 
     personalConfiguration = { pkgs, ... }:{
@@ -145,6 +145,7 @@
         };
         onActivation.cleanup = "zap";
       };
+      nixpkgs.hostPlatform = "aarch64-darwin";
     };
 
     workConfiguration = { pkgs, ... }:{
@@ -183,6 +184,7 @@
           "/System/Applications/Utilities/Activity Monitor.app"
         ];
       };
+      nixpkgs.hostPlatform = "x86_64-darwin";
     };
 
     homebrewModule = {
