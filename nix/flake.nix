@@ -13,6 +13,9 @@
   let
     commonConfiguration = { pkgs, ... }: {
       nixpkgs.config.allowUnfree = true;
+      environment.variables = {
+        NIX_SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
+      };
 
       # List packages installed in system profile. To search by name, run:
       # $ nix-env -qaP | grep wgepkgs.wgett
@@ -136,7 +139,7 @@
           "telegram"
           "tradingview"
           "visual-studio-code@insiders"
-          "whatsapp"
+          "WhatsApp"
         ];
         brews = [
         ];
@@ -155,7 +158,7 @@
         pkgs.k9s
         pkgs.nmap
         pkgs.opentofu
-        pkgs.telnet
+        #pkgs.telnet
       ];
       homebrew = {
         enable = true;
@@ -187,11 +190,21 @@
       nixpkgs.hostPlatform = "x86_64-darwin";
     };
 
-    homebrewModule = {
+    defaultHomebrewModule = {
       nix-homebrew = {
         enable = true;
         # Apple Silicon Only: Also install Homebrew under the default Intel prefix for Rosetta 2
         enableRosetta = true;
+        # User owning the Homebrew prefix
+        user = "adrianofsantos";
+        autoMigrate = true;
+      };
+    };
+    workHomebrewModule = {
+      nix-homebrew = {
+        enable = true;
+        # Apple Silicon Only: Also install Homebrew under the default Intel prefix for Rosetta 2
+        enableRosetta = false;
         # User owning the Homebrew prefix
         user = "adrianofsantos";
         autoMigrate = true;
@@ -205,7 +218,7 @@
       modules = [ 
         commonConfiguration
         personalConfiguration
-        nix-homebrew.darwinModules.nix-homebrew homebrewModule
+        nix-homebrew.darwinModules.nix-homebrew defaultHomebrewModule
       ];
     };
     # $ darwin-rebuild build --flake .#AM-C02FF7WQMD6P
@@ -213,7 +226,14 @@
       modules = [ 
         commonConfiguration
         workConfiguration
-        nix-homebrew.darwinModules.nix-homebrew homebrewModule
+        nix-homebrew.darwinModules.nix-homebrew workHomebrewModule
+        {
+          # Adicione a configuração de certificados DENTRO de um módulo
+          security.pki.certificateFiles = [
+            ./certs/CA-ROOT-AMERICANAS.crt
+            ./certs/CA-LASA.crt
+          ];
+        }
       ];
     };
   };
