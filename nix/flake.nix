@@ -172,12 +172,12 @@
           "google-chrome"
         ];
         brews = [
-          "b2w/devops/metaplane"
+          #"b2w/devops/metaplane"
         ];
         masApps = {
         };
         taps = [
-          "b2w/devops git@gitlab.internal.b2w.io:team/devops/metaplane-cli-homebrew.git"
+          #"b2w/devops git@gitlab.internal.b2w.io:team/devops/metaplane-cli-homebrew.git"
         ];
         onActivation.cleanup = "zap";
       };
