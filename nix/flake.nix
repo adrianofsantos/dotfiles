@@ -133,7 +133,6 @@
         masApps = {
           "Perplexity ask anything" = 6714467650;
         };
-
         system.defaults = {
           dock.persistent-apps = [
             "/Applications/Microsoft Edge.app"
@@ -149,7 +148,6 @@
             "/System/Applications/Utilities/Activity Monitor.app"
           ];
         };
-
         onActivation.cleanup = "zap";
       };
       nixpkgs.hostPlatform = "aarch64-darwin";
