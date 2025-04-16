@@ -133,22 +133,22 @@
         masApps = {
           "Perplexity ask anything" = 6714467650;
         };
-        system.defaults = {
-          dock.persistent-apps = [
-            "/Applications/Microsoft Edge.app"
-            "/Applications/Warp.app"
-            "${pkgs.obsidian}/Applications/Obsidian.app"
-            "/Applications/qbittorrent.app"
-            "/Applications/Telegram.app"
-            "/Applications/WhatsApp.app"
-            "/Applications/Discord.app"
-            "/Applications/Proton Mail.app"
-            "/System/Applications/Automator.app"
-            "/System/Applications/Calendar.app"
-            "/System/Applications/Utilities/Activity Monitor.app"
-          ];
-        };
         onActivation.cleanup = "zap";
+      };
+      system.defaults = {
+        dock.persistent-apps = [
+          "/Applications/Microsoft Edge.app"
+          "/Applications/Warp.app"
+          "${pkgs.obsidian}/Applications/Obsidian.app"
+          "/Applications/qbittorrent.app"
+          "/Applications/Telegram.app"
+          "/Applications/WhatsApp.app"
+          "/Applications/Discord.app"
+          "/Applications/Proton Mail.app"
+          "/System/Applications/Automator.app"
+          "/System/Applications/Calendar.app"
+          "/System/Applications/Utilities/Activity Monitor.app"
+        ];
       };
       nixpkgs.hostPlatform = "aarch64-darwin";
     };
