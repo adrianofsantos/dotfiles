@@ -110,6 +110,7 @@
     personalConfiguration = { pkgs, ... }:{
       environment.systemPackages = [
         pkgs.ipfetch
+        pkgs.podman
       ];
       homebrew = {
         enable = true;
