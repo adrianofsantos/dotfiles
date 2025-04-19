@@ -183,9 +183,9 @@
       };
       system.defaults = {
         dock.persistent-apps = [
-          "/Applications/Microsoft Edge"
-          "/Applications/Microsoft Outlook"
-          "/Applications/Microsoft Teams"
+          "/Applications/Microsoft Edge.app"
+          "/Applications/Microsoft Outlook.app"
+          "/Applications/Microsoft Teams.app"
           "/Applications/Warp.app"
           "${pkgs.obsidian}/Applications/Obsidian.app"
           "/System/Applications/Automator.app"
