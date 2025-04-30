@@ -20,7 +20,6 @@
       # List packages installed in system profile. To search by name, run:
       # $ nix-env -qaP | grep wgepkgs.wgett
       environment.systemPackages = [
-        pkgs.ansible
         pkgs.bat
         pkgs.eza
         pkgs.fd
