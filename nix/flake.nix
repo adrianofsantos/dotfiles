@@ -117,6 +117,7 @@
           "balenaetcher"
           "discord"
           "duckduckgo"
+          "google-chrome"
           "ollama"
           "proton-drive"
           "proton-mail"
