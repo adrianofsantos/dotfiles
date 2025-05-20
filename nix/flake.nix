@@ -107,6 +107,7 @@
     };
 
     personalConfiguration = { pkgs, ... }:{
+      system.primaryUser = "adrianofsantos";
       environment.systemPackages = [
         pkgs.ipfetch
         pkgs.podman
