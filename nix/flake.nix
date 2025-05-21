@@ -12,6 +12,7 @@
   outputs = inputs@{ self, nix-darwin, nixpkgs, nix-homebrew }:
   let
     commonConfiguration = { pkgs, ... }: {
+      system.primaryUser = "adrianofsantos";
       nixpkgs.config.allowUnfree = true;
       #environment.variables = {
       #  NIX_SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
@@ -107,7 +108,6 @@
     };
 
     personalConfiguration = { pkgs, ... }:{
-      system.primaryUser = "adrianofsantos";
       environment.systemPackages = [
         pkgs.ipfetch
         pkgs.podman
