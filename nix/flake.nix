@@ -116,8 +116,10 @@
         enable = true;
         casks = [
           "balenaetcher"
+          "cryptomator"
           "discord"
           "duckduckgo"
+          "fuse-t"
           "google-chrome"
           "ollama"
           "proton-drive"
@@ -128,7 +130,7 @@
           "telegram"
           "tradingview"
           "visual-studio-code@insiders"
-          "WhatsApp"
+          "whatsApp"
         ];
         brews = [
         ];
