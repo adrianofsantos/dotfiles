@@ -129,6 +129,7 @@
           "qbittorrent"
           "telegram"
           "tradingview"
+          "veracrypt-fuse-t"
           "visual-studio-code@insiders"
           "whatsApp"
         ];
