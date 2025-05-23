@@ -22,7 +22,7 @@ alias gc="git checkout"
 alias ga="git add"
 
 # Nix
-alias dr="darwin-rebuild switch --flake ~/repos/github/dotfiles/nix/"
+alias dr="sudo darwin-rebuild switch --flake ~/repos/github/dotfiles/nix/"
 
 # Suffix extensions
 alias -s txt=nvim
