@@ -174,6 +174,7 @@
         enable = true;
         casks = [
           "google-chrome"
+          "proton-drive"
         ];
         brews = [
           #"b2w/devops/metaplane"
