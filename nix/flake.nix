@@ -50,6 +50,7 @@
           "appcleaner"
           "ccleaner"
           "Firefox"
+          "gh"
           "microsoft-edge"
           "openmtp"
           "raycast"
