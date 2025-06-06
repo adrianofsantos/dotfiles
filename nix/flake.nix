@@ -50,7 +50,6 @@
           "appcleaner"
           "ccleaner"
           "Firefox"
-          "gh"
           "microsoft-edge"
           "openmtp"
           "raycast"
@@ -59,6 +58,7 @@
         ];
         brews = [
           "bpytop"
+          "gh"
           "watch"
           "mas"
         ];
