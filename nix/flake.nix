@@ -132,6 +132,7 @@
           "veracrypt-fuse-t"
           "visual-studio-code@insiders"
           "whatsApp"
+          "zotero"
         ];
         brews = [
         ];
