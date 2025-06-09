@@ -178,6 +178,8 @@
         casks = [
           "google-chrome"
           "proton-drive"
+          "cryptomator"
+          "macfuse"
         ];
         brews = [
           #"b2w/devops/metaplane"
