@@ -189,6 +189,7 @@
           "Microsoft Outlook" = 985367838;
           "Microsoft PowerPoint" = 462062816;
           "Microsoft Word" = 462054704;
+          "Azure VPN" = 1553936137;
         };
         taps = [
           #"b2w/devops git@gitlab.internal.b2w.io:team/devops/metaplane-cli-homebrew.git"
