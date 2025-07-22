@@ -49,12 +49,12 @@
         casks = [
           "appcleaner"
           "ccleaner"
-          "Firefox"
+          "firefox"
           "microsoft-edge"
           "openmtp"
           "raycast"
-          "warp"
           "visual-studio-code"
+          "warp"
         ];
         brews = [
           "bpytop"
@@ -128,6 +128,7 @@
           "proton-pass"
           "protonvpn"
           "qbittorrent"
+          "shortcat"
           "telegram"
           "tradingview"
           "veracrypt-fuse-t"
