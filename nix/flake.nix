@@ -21,8 +21,10 @@
       # List packages installed in system profile. To search by name, run:
       # $ nix-env -qaP | grep wgepkgs.wgett
       environment.systemPackages = [
+        pkgs.ansible
         pkgs.bat
         pkgs.eza
+        pkgs.fastfetch
         pkgs.fd
         pkgs.fzf
         pkgs.gcal
@@ -34,7 +36,6 @@
         pkgs.jq
         pkgs.lazydocker
         pkgs.lazygit
-        pkgs.neofetch
         pkgs.neovim
         pkgs.obsidian
         pkgs.ripgrep
@@ -134,7 +135,6 @@
           "veracrypt-fuse-t"
           "visual-studio-code@insiders"
           "whatsApp"
-          "zotero"
         ];
         brews = [
         ];
