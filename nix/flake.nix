@@ -123,7 +123,6 @@
           "duckduckgo"
           "fuse-t"
           "google-chrome"
-          "ollama"
           "proton-drive"
           "proton-mail"
           "proton-pass"
