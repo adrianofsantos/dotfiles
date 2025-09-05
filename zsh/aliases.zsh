@@ -33,3 +33,10 @@ alias -s json=nvim
 
 # O alias abaixo provoca o comportamento de sempre abrir o script no editor de texto e não a execução dele.
 #alias -s sh=nvim
+#
+
+alias ..="cd .."
+alias ...="cd ../.."
+alias ....="cd ../../.."
+alias .....="cd ../../../.."
+alias ......="cd ../../../../.."
