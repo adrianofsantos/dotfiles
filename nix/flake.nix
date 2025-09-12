@@ -49,7 +49,7 @@
         enable = true;
         casks = [
           "appcleaner"
-          "ccleaner"
+          "cryptomator"
           "firefox"
           "microsoft-edge"
           "openmtp"
@@ -118,7 +118,6 @@
         enable = true;
         casks = [
           "balenaetcher"
-          "cryptomator"
           "discord"
           "duckduckgo"
           "fuse-t"
