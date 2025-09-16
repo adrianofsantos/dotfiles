@@ -119,6 +119,7 @@
         casks = [
           "balenaetcher"
           "discord"
+          "docker-desktop"
           "duckduckgo"
           "fuse-t"
           "google-chrome"
@@ -127,6 +128,7 @@
           "proton-pass"
           "protonvpn"
           "qbittorrent"
+          "rancher"
           "shortcat"
           "telegram"
           "tradingview"
