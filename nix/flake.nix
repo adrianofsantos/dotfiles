@@ -118,6 +118,7 @@
         enable = true;
         casks = [
           "balenaetcher"
+          "brave-browser"
           "discord"
           "docker-desktop"
           "duckduckgo"
