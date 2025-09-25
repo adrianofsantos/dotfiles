@@ -146,7 +146,7 @@
       };
       system.defaults = {
         dock.persistent-apps = [
-          "/Applications/Microsoft Edge.app"
+          "/Applications/Brave Browser.app"
           "/Applications/Warp.app"
           "${pkgs.obsidian}/Applications/Obsidian.app"
           "/Applications/qbittorrent.app"
