@@ -129,7 +129,6 @@
           "proton-pass"
           "protonvpn"
           "qbittorrent"
-          "rancher"
           "shortcat"
           "telegram"
           "tradingview"
