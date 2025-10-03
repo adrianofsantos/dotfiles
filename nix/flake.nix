@@ -49,6 +49,7 @@
         enable = true;
         casks = [
           "appcleaner"
+          "brave-browser"
           "cryptomator"
           "firefox"
           "microsoft-edge"
@@ -118,7 +119,6 @@
         enable = true;
         casks = [
           "balenaetcher"
-          "brave-browser"
           "discord"
           "docker-desktop"
           "duckduckgo"
