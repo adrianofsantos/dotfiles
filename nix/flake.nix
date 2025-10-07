@@ -184,6 +184,7 @@
           #"b2w/devops/metaplane"
         ];
         masApps = {
+          "Azure vpn client" = 1553936137;
           "Microsoft Excel" = 462058435;
           "Microsoft Outlook" = 985367838;
           "Microsoft PowerPoint" = 462062816;
