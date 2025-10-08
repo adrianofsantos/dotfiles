@@ -32,7 +32,7 @@
         pkgs.gnupg
         pkgs.htop
         pkgs.imagemagick
-        pkgs.ipcalc
+        # pkgs.ipcalc  # Temporarily disabled due to nokogiri build issues
         pkgs.jq
         pkgs.lazydocker
         pkgs.lazygit
