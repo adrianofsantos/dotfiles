@@ -51,6 +51,7 @@
           "appcleaner"
           "brave-browser"
           "cryptomator"
+          "diskspace"
           "firefox"
           "microsoft-edge"
           "openmtp"
