@@ -199,7 +199,7 @@
       };
       system.defaults = {
         dock.persistent-apps = [
-          "/Applications/Microsoft Edge.app"
+          "/Applications/Brave Browser.app"
           "/Applications/Microsoft Outlook.app"
           "/Applications/Microsoft Teams.app"
           "/Applications/Warp.app"
