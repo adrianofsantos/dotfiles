@@ -1,5 +1,7 @@
 # Comandos para kubernetes
 alias k=kubectl
+alias kctx=kubectl
+alias kns=kubens
 #alias kc=kubecolor
 
 # Aliases para comando `ls`
