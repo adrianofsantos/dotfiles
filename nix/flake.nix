@@ -34,6 +34,9 @@
         pkgs.imagemagick
         pkgs.ipcalc
         pkgs.jq
+        pkgs.krew
+        pkgs.kubecolor
+        pkgs.kubectx
         pkgs.lazydocker
         pkgs.lazygit
         pkgs.neovim
