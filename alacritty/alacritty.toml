@@ -11,3 +11,10 @@ multiplier = 5
 [window]
 opacity = 0.5
 blur    = true
+
+[general]
+import = [
+  #"~/.config/alacritty/base16-dark.toml",
+  #"~/.config/alacritty/keybindings.toml",
+  #"alacritty-theme/themes/gruvbox_dark.toml",
+]
