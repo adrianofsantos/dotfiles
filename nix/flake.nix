@@ -52,6 +52,7 @@
       homebrew = {
         enable = true;
         casks = [
+          "alacritty"
           "appcleaner"
           "brave-browser"
           "cryptomator"
@@ -142,6 +143,7 @@
           "whatsApp"
         ];
         brews = [
+          "talosctl"
         ];
         masApps = {
           "Perplexity ask anything" = 6714467650;
