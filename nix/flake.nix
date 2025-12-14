@@ -14,10 +14,10 @@
     commonConfiguration = { pkgs, ... }: {
       system.primaryUser = "adrianofsantos";
       nixpkgs.config.allowUnfree = true;
-      #environment.variables = {
-      #  NIX_SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
-      #};
-
+      # Fonts
+      fonts.packages = with pkgs; [
+        nerd-fonts.hack
+      ];
       # List packages installed in system profile. To search by name, run:
       # $ nix-env -qaP | grep wgepkgs.wgett
       environment.systemPackages = [
@@ -47,6 +47,7 @@
         pkgs.stow
         pkgs.tree
         pkgs.wget
+        pkgs.zoxide
       ];
 
       homebrew = {
@@ -169,17 +170,8 @@
       nixpkgs.hostPlatform = "aarch64-darwin";
     };
 
-    workConfiguration = { pkgs, ... }:{
-      #environment.variables = {
-      #  NIX_SSL_CERT_FILE = "${pkgs.cacert}./certs/combined-certs.crt";
-      #};
+    kyoshiConfiguration = { pkgs, ... }:{
       environment.systemPackages = [
-        pkgs.azure-cli
-        pkgs.eksctl
-        pkgs.k9s
-        pkgs.nmap
-        pkgs.opentofu
-        #pkgs.telnet
       ];
       homebrew = {
         enable = true;
@@ -188,31 +180,27 @@
           "proton-drive"
         ];
         brews = [
-          #"b2w/devops/metaplane"
         ];
         masApps = {
-          "Azure vpn client" = 1553936137;
-          "Microsoft Excel" = 462058435;
-          "Microsoft Outlook" = 985367838;
-          "Microsoft PowerPoint" = 462062816;
-          "Microsoft Word" = 462054704;
+          "HP Smart" = 1474276998;
         };
         taps = [
-          #"b2w/devops git@gitlab.internal.b2w.io:team/devops/metaplane-cli-homebrew.git"
         ];
         onActivation.cleanup = "zap";
       };
       system.defaults = {
         dock.persistent-apps = [
           "/Applications/Brave Browser.app"
-          "/Applications/Microsoft Outlook.app"
-          "/Applications/Microsoft Teams.app"
           "/Applications/Warp.app"
           "${pkgs.obsidian}/Applications/Obsidian.app"
           "/System/Applications/Automator.app"
           "/System/Applications/Calendar.app"
           "/System/Applications/Utilities/Activity Monitor.app"
         ];
+        loginwindow = {
+          GuestEnabled = false;
+          SHOWFULLNAME = false;
+        };
       };
       nixpkgs.hostPlatform = "x86_64-darwin";
     };
@@ -227,7 +215,7 @@
         autoMigrate = true;
       };
     };
-    workHomebrewModule = {
+    kyoshiHomebrewModule = {
       nix-homebrew = {
         enable = true;
         # Apple Silicon Only: Also install Homebrew under the default Intel prefix for Rosetta 2
@@ -248,19 +236,12 @@
         nix-homebrew.darwinModules.nix-homebrew defaultHomebrewModule
       ];
     };
-    # $ darwin-rebuild build --flake .#AM-C02FF7WQMD6P
-    darwinConfigurations."AM-C02FF7WQMD6P" = nix-darwin.lib.darwinSystem {
+    # $ darwin-rebuild build --flake .#kyoshi
+    darwinConfigurations."kyoshi" = nix-darwin.lib.darwinSystem {
       modules = [ 
         commonConfiguration
-        workConfiguration
-        nix-homebrew.darwinModules.nix-homebrew workHomebrewModule
-        {
-          # Adicione a configuração de certificados DENTRO de um módulo
-          security.pki.certificateFiles = [
-            ./certs/CA-ROOT-AMERICANAS.crt
-            ./certs/CA-LASA.crt
-          ];
-        }
+        kyoshiConfiguration
+        nix-homebrew.darwinModules.nix-homebrew kyoshiHomebrewModule
       ];
     };
   };
