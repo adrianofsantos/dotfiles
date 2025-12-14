@@ -2,5 +2,5 @@
 
 --ignore=.DS_Store
 --ignore=.stowrc
---ignore=zsh/.zshrv
+--ignore=zsh/.zshrc
 
