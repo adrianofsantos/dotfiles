@@ -40,7 +40,6 @@
         pkgs.lazydocker
         pkgs.lazygit
         pkgs.neovim
-        pkgs.nodejs
         pkgs.obsidian
         pkgs.ripgrep
         pkgs.starship
@@ -126,6 +125,7 @@
         enable = true;
         casks = [
           "balenaetcher"
+          "calibre"
           "discord"
           "docker-desktop"
           "duckduckgo"
