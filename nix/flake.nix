@@ -242,6 +242,7 @@
     darwinConfigurations."kyoshi" = nix-darwin.lib.darwinSystem {
       modules = [ 
         commonConfiguration
+        personalConfiguration
         kyoshiConfiguration
         nix-homebrew.darwinModules.nix-homebrew
         kyoshiHomebrewModule
