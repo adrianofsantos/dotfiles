@@ -233,7 +233,9 @@
       modules = [ 
         commonConfiguration
         personalConfiguration
-        nix-homebrew.darwinModules.nix-homebrew defaultHomebrewModule
+        nix-homebrew.darwinModules.nix-homebrew
+        defaultHomebrewModule
+        ./modules/proton.nix
       ];
     };
     # $ darwin-rebuild build --flake .#kyoshi
@@ -241,7 +243,8 @@
       modules = [ 
         commonConfiguration
         kyoshiConfiguration
-        nix-homebrew.darwinModules.nix-homebrew kyoshiHomebrewModule
+        nix-homebrew.darwinModules.nix-homebrew
+        kyoshiHomebrewModule
       ];
     };
   };
