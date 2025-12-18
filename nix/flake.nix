@@ -141,6 +141,7 @@
           "tradingview"
           "veracrypt-fuse-t"
           "visual-studio-code@insiders"
+          "vlc"
           "whatsApp"
         ];
         brews = [
