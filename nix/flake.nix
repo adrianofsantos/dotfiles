@@ -152,6 +152,10 @@
         };
         onActivation.cleanup = "zap";
       };
+    };
+
+    aangConfigurations = { pkgs, ... }:{
+      nixpkgs.hostPlatform = "aarch64-darwin";
       system.defaults = {
         dock.persistent-apps = [
           "/Applications/Brave Browser.app"
@@ -167,7 +171,6 @@
           "/System/Applications/Utilities/Activity Monitor.app"
         ];
       };
-      nixpkgs.hostPlatform = "aarch64-darwin";
     };
 
     kyoshiConfiguration = { pkgs, ... }:{
@@ -205,7 +208,7 @@
       nixpkgs.hostPlatform = "x86_64-darwin";
     };
 
-    defaultHomebrewModule = {
+    enableRosettaHomebrewModule = {
       nix-homebrew = {
         enable = true;
         # Apple Silicon Only: Also install Homebrew under the default Intel prefix for Rosetta 2
@@ -215,7 +218,7 @@
         autoMigrate = true;
       };
     };
-    kyoshiHomebrewModule = {
+    disableRosettaHomebrewModule = {
       nix-homebrew = {
         enable = true;
         # Apple Silicon Only: Also install Homebrew under the default Intel prefix for Rosetta 2
@@ -233,8 +236,9 @@
       modules = [ 
         commonConfiguration
         personalConfiguration
+        aangConfigurations
         nix-homebrew.darwinModules.nix-homebrew
-        defaultHomebrewModule
+        enableRosettaHomebrewModule
         ./modules/proton.nix
       ];
     };
@@ -245,7 +249,7 @@
         personalConfiguration
         kyoshiConfiguration
         nix-homebrew.darwinModules.nix-homebrew
-        kyoshiHomebrewModule
+        disableRosettaHomebrewModule
       ];
     };
   };
