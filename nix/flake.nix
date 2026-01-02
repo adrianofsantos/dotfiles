@@ -21,7 +21,6 @@
       # List packages installed in system profile. To search by name, run:
       # $ nix-env -qaP | grep wgepkgs.wgett
       environment.systemPackages = [
-        pkgs.ansible
         pkgs.bat
         pkgs.eza
         pkgs.fastfetch
@@ -52,16 +51,12 @@
       homebrew = {
         enable = true;
         casks = [
-          "alacritty"
           "appcleaner"
           "brave-browser"
           "cryptomator"
-          "diskspace"
           "firefox"
-          "microsoft-edge"
           "openmtp"
           "raycast"
-          "visual-studio-code"
           "warp"
         ];
         brews = [
@@ -121,23 +116,13 @@
       homebrew = {
         enable = true;
         casks = [
-          "balenaetcher"
-          "calibre"
-          "discord"
-          "docker-desktop"
-          "duckduckgo"
           "fuse-t"
-          "google-chrome"
           "proton-drive"
           "proton-mail"
           "proton-pass"
           "protonvpn"
-          "qbittorrent"
-          "shortcat"
           "telegram"
-          "tradingview"
           "veracrypt-fuse-t"
-          "visual-studio-code@insiders"
           "vlc"
           "whatsApp"
         ];
@@ -154,6 +139,12 @@
 
     aangConfigurations = { pkgs, ... }:{
       nixpkgs.hostPlatform = "aarch64-darwin";
+      homebrew = {
+        enable = true;
+        casks = [
+          "google-chrome"
+        ];
+      };
       system.defaults = {
         dock.persistent-apps = [
           "/Applications/Brave Browser.app"
@@ -177,8 +168,15 @@
       homebrew = {
         enable = true;
         casks = [
-          "google-chrome"
+          "balenaetcher"
+          "calibre"
+          "discord"
+          "docker-desktop"
+          "duckduckgo"
           "proton-drive"
+          "qbittorrent"
+          "shortcat"
+          "tradingview"
         ];
         brews = [
         ];
