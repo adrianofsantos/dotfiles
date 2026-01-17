@@ -161,7 +161,6 @@
       homebrew = {
         enable = true;
         casks = [
-          "chatgpt"
           "google-chrome"
         ];
       };
@@ -229,11 +228,21 @@
       nixpkgs.hostPlatform = "aarch64-darwin";
     };
 
-    rosettaHomebrewModule = {
+    enableRosettaHomebrewModule = {
       nix-homebrew = {
         enable = true;
         # Apple Silicon Only: Also install Homebrew under the default Intel prefix for Rosetta 2
-        enableRosetta = pkgs.stdenv.hostPlatform.isAarch64;
+        enableRosetta = true;
+        # User owning the Homebrew prefix
+        user = "adrianofsantos";
+        autoMigrate = true;
+      };
+    };
+    disableRosettaHomebrewModule = {
+      nix-homebrew = {
+        enable = true;
+        # Apple Silicon Only: Also install Homebrew under the default Intel prefix for Rosetta 2
+        enableRosetta = false;
         # User owning the Homebrew prefix
         user = "adrianofsantos";
         autoMigrate = true;
@@ -249,7 +258,7 @@
         personalConfiguration
         aangConfigurations
         nix-homebrew.darwinModules.nix-homebrew
-        rosettaHomebrewModule
+        enableRosettaHomebrewModule
         ./modules/proton.nix
       ];
     };
@@ -260,7 +269,7 @@
         personalConfiguration
         kyoshiConfiguration
         nix-homebrew.darwinModules.nix-homebrew
-        rosettaHomebrewModule
+        enableRosettaHomebrewModule
       ];
     };
   };
