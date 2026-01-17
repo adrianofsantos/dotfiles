@@ -229,7 +229,7 @@
       nixpkgs.hostPlatform = "aarch64-darwin";
     };
 
-    rosettaHomebrewModule = {
+    rosettaHomebrewModule = {pkgs, ...}: {
       nix-homebrew = {
         enable = true;
         # Apple Silicon Only: Also install Homebrew under the default Intel prefix for Rosetta 2
