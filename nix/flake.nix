@@ -94,8 +94,20 @@
       security.pam.services.sudo_local.touchIdAuth = true; #default false
       nix.enable = true; #defaul true
 
-      # Necessary for using flakes on this system.
-      nix.settings.experimental-features = "nix-command flakes";
+      nix = {
+        settings = {
+          # Necessary for using flakes on this system.
+          experimental-features = "nix-command flakes";
+
+          # Otimiza automaticamente a cada build
+          auto-optimise-store = true;
+        };
+
+        gc = {
+          automatic = true;
+          options = "--delete-older-than 7d";
+        };
+      };
 
       # Enable alternative shell support in nix-darwin.
       # programs.fish.enable = true;
