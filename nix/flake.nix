@@ -98,9 +98,16 @@
         settings = {
           # Necessary for using flakes on this system.
           experimental-features = "nix-command flakes";
+        };
 
-          # Otimiza automaticamente a cada build
-          auto-optimise-store = true;
+        optimise = {
+          automatic = true;
+          interval = [
+            {
+              Hour = 6;
+              Minute = 0;
+            };
+          ];
         };
 
         gc = {
