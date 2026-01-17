@@ -142,6 +142,7 @@
       homebrew = {
         enable = true;
         casks = [
+          "chatgpt"
           "google-chrome"
         ];
       };
