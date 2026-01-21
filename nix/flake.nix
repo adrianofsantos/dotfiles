@@ -197,6 +197,7 @@
           "qbittorrent"
           "shortcat"
           "tradingview"
+          "visual-studio-code"
         ];
         brews = [
         ];
@@ -220,6 +221,7 @@
           "/System/Applications/Automator.app"
           "/System/Applications/Calendar.app"
           "/System/Applications/Utilities/Activity Monitor.app"
+          "/System/Applications/System Settings.app"
         ];
         loginwindow = {
           GuestEnabled = false;
