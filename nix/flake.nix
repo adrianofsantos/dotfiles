@@ -13,7 +13,7 @@
   let
     commonConfiguration = { pkgs, ... }: {
       system.primaryUser = "adrianofsantos";
-      nixpkgs.config.allowUnfree = true;
+      nixpkgs.config.allowUnfree = false;
       # Fonts
       fonts.packages = with pkgs; [
         nerd-fonts.hack
@@ -39,7 +39,6 @@
         pkgs.lazydocker
         pkgs.lazygit
         pkgs.neovim
-        pkgs.obsidian
         pkgs.ripgrep
         pkgs.starship
         pkgs.stow
@@ -55,6 +54,7 @@
           "brave-browser"
           "cryptomator"
           "firefox"
+          "obsidian"
           "openmtp"
           "raycast"
           "warp"
@@ -80,7 +80,7 @@
         finder.FXPreferredViewStyle = "clmv";
         screencapture.target = "file";
         screencapture.location = "~/Pictures/screenshots";
-        screensaver.askForPasswordDelay = 10;
+        screensaver.askForPasswordDelay = 0;
         loginwindow.LoginwindowText = "“Seja a mudança que você quer ver no mundo.“ – Mahatma Gandhi";
         loginwindow.GuestEnabled = false;
         menuExtraClock.Show24Hour = true;
@@ -169,7 +169,7 @@
         dock.persistent-apps = [
           "/Applications/Brave Browser.app"
           "/Applications/Warp.app"
-          "${pkgs.obsidian}/Applications/Obsidian.app"
+          "/Applications/Obsidian.app"
           "/Applications/qbittorrent.app"
           "/Applications/Telegram.app"
           "/Applications/WhatsApp.app"
@@ -227,6 +227,7 @@
           GuestEnabled = false;
           SHOWFULLNAME = false;
         };
+        screensaver.askForPasswordDelay = 10;
       };
       nixpkgs.hostPlatform = "aarch64-darwin";
     };
