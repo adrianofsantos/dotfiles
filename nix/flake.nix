@@ -212,7 +212,7 @@
         dock.persistent-apps = [
           "/Applications/Brave Browser.app"
           "/Applications/Warp.app"
-          "${pkgs.obsidian}/Applications/Obsidian.app"
+          "/Applications/Obsidian.app"
           "/Applications/qbittorrent.app"
           "/Applications/Telegram.app"
           "/Applications/WhatsApp.app"
