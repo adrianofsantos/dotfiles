@@ -13,7 +13,7 @@
   let
     commonConfiguration = { pkgs, ... }: {
       system.primaryUser = "adrianofsantos";
-      nixpkgs.config.allowUnfree = false;
+      nixpkgs.config.allowUnfree = true;
       # Fonts
       fonts.packages = with pkgs; [
         nerd-fonts.hack
