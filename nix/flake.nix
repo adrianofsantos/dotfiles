@@ -193,7 +193,7 @@
           "discord"
           "docker-desktop"
           "duckduckgo"
-          "ollama"
+          "ollama-app"
           "proton-drive"
           "qbittorrent"
           "shortcat"
