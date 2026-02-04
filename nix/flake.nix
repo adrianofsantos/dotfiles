@@ -190,6 +190,8 @@
         casks = [
           "balenaetcher"
           "calibre"
+          "claude"
+          "claude-code"
           "discord"
           "docker-desktop"
           "duckduckgo"
