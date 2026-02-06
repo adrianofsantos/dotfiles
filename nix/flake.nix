@@ -198,6 +198,7 @@
           "ollama-app"
           "proton-drive"
           "qbittorrent"
+          "samsung-magician"
           "shortcat"
           "tradingview"
           "visual-studio-code"
