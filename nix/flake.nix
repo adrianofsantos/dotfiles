@@ -203,6 +203,7 @@
           "visual-studio-code"
         ];
         brews = [
+          "gemini-cli"
         ];
         masApps = {
           "HP Smart" = 1474276998;
