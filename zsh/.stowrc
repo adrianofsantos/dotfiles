@@ -1,7 +1,0 @@
---targe=~
-
---ignore=.stow-local-ignore
---ignore=.stowrc
---ignore=aliases.zsh
---ignore=functions.zsh
---ignore=zsh-config.sh
