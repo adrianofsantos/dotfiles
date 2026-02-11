@@ -45,7 +45,7 @@
       "......" = "cd ../../../../..";
     };
 
-    initExtra = ''
+    initContent = ''
       # Suffix aliases — abrir arquivos diretamente no nvim
       alias -s txt=nvim
       alias -s md=nvim
