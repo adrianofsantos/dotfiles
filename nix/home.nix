@@ -53,9 +53,6 @@
       alias -s yml=nvim
       alias -s json=nvim
 
-      # Starship prompt
-      eval "$(starship init zsh)"
-
       # Zoxide
       eval "$(zoxide init zsh)"
 
@@ -78,7 +75,7 @@
   # --- Starship (migrado de starship.toml) ---
   programs.starship = {
     enable = true;
-    enableZshIntegration = false; # já está no initContent manualmente
+    enableZshIntegration = true;
   };
   xdg.configFile."starship.toml" = {
     source = config.lib.file.mkOutOfStoreSymlink

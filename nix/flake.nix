@@ -46,7 +46,6 @@
         pkgs.neovim
         pkgs.ripgrep
         pkgs.starship
-        pkgs.stow
         pkgs.tree
         pkgs.wget
         pkgs.zoxide
