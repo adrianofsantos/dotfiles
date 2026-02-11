@@ -1,6 +1,8 @@
 { config, pkgs, ... }:
 
 {
+  home.username = "adrianofsantos";
+  home.homeDirectory = "/Users/adrianofsantos";
   home.stateVersion = "24.05";
 
   # --- ZSH (migrado de zsh/.zshrc + aliases.zsh + functions.zsh) ---
