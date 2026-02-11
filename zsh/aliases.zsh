@@ -20,7 +20,7 @@ alias lg="lazygit"
 # Aliases para comando `git`
 alias g="git"
 alias gc="git commit"
-alias gc="git checkout"
+alias gco="git checkout"
 alias ga="git add"
 
 # Nix

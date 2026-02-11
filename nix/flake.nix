@@ -6,10 +6,14 @@
     nix-darwin.url = "github:nix-darwin/nix-darwin/nix-darwin-25.05";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
     nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   #outputs = inputs@{ self, nix-darwin, nixpkgs, nix-homebrew, homebrew-bundle }:
-  outputs = inputs@{ self, nix-darwin, nixpkgs, nix-homebrew }:
+  outputs = inputs@{ self, nix-darwin, nixpkgs, nix-homebrew, home-manager }:
   let
     commonConfiguration = { pkgs, ... }: {
       system.primaryUser = "adrianofsantos";
@@ -252,23 +256,39 @@
     # Build darwin flake using:
     # $ darwin-rebuild build --flake .#Aang
     darwinConfigurations."Aang" = nix-darwin.lib.darwinSystem {
-      modules = [ 
+      modules = [
         commonConfiguration
         personalConfiguration
         aangConfigurations
         nix-homebrew.darwinModules.nix-homebrew
         rosettaHomebrewModule
         ./modules/proton.nix
+        home-manager.darwinModules.home-manager
+        {
+          home-manager = {
+            useGlobalPkgs = true;
+            useUserPackages = true;
+            users.adrianofsantos = import ./home.nix;
+          };
+        }
       ];
     };
     # $ darwin-rebuild build --flake .#Kyoshi
     darwinConfigurations."Kyoshi" = nix-darwin.lib.darwinSystem {
-      modules = [ 
+      modules = [
         commonConfiguration
         personalConfiguration
         kyoshiConfiguration
         nix-homebrew.darwinModules.nix-homebrew
         rosettaHomebrewModule
+        home-manager.darwinModules.home-manager
+        {
+          home-manager = {
+            useGlobalPkgs = true;
+            useUserPackages = true;
+            users.adrianofsantos = import ./home.nix;
+          };
+        }
       ];
     };
   };
