@@ -75,6 +75,35 @@
     };
   };
 
+  # --- Starship (migrado de starship.toml) ---
+  programs.starship = {
+    enable = true;
+    enableZshIntegration = false; # já está no initContent manualmente
+  };
+  xdg.configFile."starship.toml" = {
+    source = config.lib.file.mkOutOfStoreSymlink
+      "/Users/adrianofsantos/repos/github/dotfiles/starship.toml";
+  };
+
+  # --- Bat (migrado de bat/) ---
+  programs.bat = {
+    enable = true;
+    config = {
+      theme = "Catppuccin-frappe";
+    };
+    syntaxes = {};
+  };
+  xdg.configFile."bat/themes" = {
+    source = config.lib.file.mkOutOfStoreSymlink
+      "/Users/adrianofsantos/repos/github/dotfiles/bat/themes";
+  };
+
+  # --- Alacritty (migrado de alacritty/) ---
+  xdg.configFile."alacritty" = {
+    source = config.lib.file.mkOutOfStoreSymlink
+      "/Users/adrianofsantos/repos/github/dotfiles/alacritty";
+  };
+
   # --- Neovim (manter LazyVim como está, só referenciar a pasta) ---
   xdg.configFile."nvim" = {
     source = config.lib.file.mkOutOfStoreSymlink

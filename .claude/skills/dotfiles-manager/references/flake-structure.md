@@ -76,17 +76,31 @@ Perplexity (both), HP Smart (Kyoshi)
 ## Home-Manager Migration Path
 
 ### Phase 1: Add home-manager input
+
+IMPORTANT: Use the `release-XX.XX` branch matching your nixpkgs version. Example: nixpkgs-25.05-darwin → release-25.05.
+
 ```nix
 inputs = {
   # existing inputs...
   home-manager = {
-    url = "github:nix-community/home-manager";
+    url = "github:nix-community/home-manager/release-25.05";
     inputs.nixpkgs.follows = "nixpkgs";
   };
 };
 ```
 
-### Phase 2: Create home module
+### Phase 2: System-level user config (REQUIRED workaround)
+
+home-manager's `nixos/common.nix` tries to read `users.users.<name>.home` from the system config.
+On nix-darwin this is null by default, causing a build error. Fix: set it in `commonConfiguration`:
+
+```nix
+users.users.adrianofsantos.home = "/Users/adrianofsantos";
+```
+
+See: https://github.com/nix-community/home-manager/issues/6557
+
+### Phase 3: Create home module
 ```nix
 # In darwinConfigurations modules list, add:
 home-manager.darwinModules.home-manager
@@ -99,53 +113,48 @@ home-manager.darwinModules.home-manager
 }
 ```
 
-### Phase 3: Migrate dotfiles incrementally
+### Phase 4: Migrate dotfiles incrementally
+
+NOTE: `programs.zsh.initExtra` is deprecated since home-manager 25.05. Use `initContent` instead.
+
+For tools with complex configs (starship, alacritty), use `mkOutOfStoreSymlink` to reference the
+existing config files instead of converting them to Nix. This keeps configs editable outside Nix.
+
 ```nix
 # home.nix
 { config, pkgs, ... }: {
+  home.username = "adrianofsantos";
+  home.homeDirectory = "/Users/adrianofsantos";
   home.stateVersion = "24.05";
 
-  # Example: migrate starship config
-  programs.starship = {
-    enable = true;
-    # OR reference existing toml:
-    # settings = builtins.fromTOML (builtins.readFile ../../starship.toml);
-  };
-
-  # Example: reference nvim config without converting
-  xdg.configFile."nvim" = {
-    source = config.lib.file.mkOutOfStoreSymlink
-      "/Users/adrianofsantos/repos/github/dotfiles/nvim";
-  };
-
-  # Example: zsh
   programs.zsh = {
     enable = true;
-    shellAliases = {
-      k = "kubectl";
-      ls = "eza --icons";
-      l = "ls --git -l";
-      v = "nvim";
-      lg = "lazygit";
-      dr = "sudo darwin-rebuild switch --flake ~/repos/github/dotfiles/nix/";
-    };
-    initExtra = ''
+    shellAliases = { /* ... */ };
+    initContent = ''
+      eval "$(starship init zsh)"
       eval "$(zoxide init zsh)"
     '';
     sessionVariables = {
       EDITOR = "nvim";
       VISUAL = "nvim";
-      NIX_CONF_DIR = "$HOME/.config/nix";
     };
   };
+
+  # Reference existing config files via symlink (no Nix conversion needed)
+  xdg.configFile."starship.toml".source = config.lib.file.mkOutOfStoreSymlink
+    "/Users/adrianofsantos/repos/github/dotfiles/starship.toml";
+  xdg.configFile."nvim".source = config.lib.file.mkOutOfStoreSymlink
+    "/Users/adrianofsantos/repos/github/dotfiles/nvim";
+  xdg.configFile."alacritty".source = config.lib.file.mkOutOfStoreSymlink
+    "/Users/adrianofsantos/repos/github/dotfiles/alacritty";
 }
 ```
 
 ### Migration Order (recommended)
-1. zsh (biggest win — eliminates .zshrc, aliases.zsh, functions.zsh)
-2. starship (simple toml import)
-3. bat (config + themes)
-4. alacritty (toml config)
-5. git (if adding git config later)
-6. nvim (keep as-is with mkOutOfStoreSymlink — LazyVim manages itself)
+1. ✅ zsh (biggest win — eliminates .zshrc, aliases.zsh, functions.zsh)
+2. ✅ starship (symlink to existing toml)
+3. ✅ bat (config via programs.bat + symlink themes)
+4. ✅ alacritty (symlink to existing toml)
+5. nvim (keep as-is with mkOutOfStoreSymlink — LazyVim manages itself)
+6. git (if adding git config later)
 7. Remove stow dependency from flake.nix
