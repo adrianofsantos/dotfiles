@@ -17,6 +17,7 @@
   let
     commonConfiguration = { pkgs, ... }: {
       system.primaryUser = "adrianofsantos";
+      users.users.adrianofsantos.home = "/Users/adrianofsantos";
       nixpkgs.config.allowUnfree = false;
       # Fonts
       fonts.packages = with pkgs; [
