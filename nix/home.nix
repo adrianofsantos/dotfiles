@@ -72,6 +72,23 @@
     };
   };
 
+  # --- Git ---
+  programs.git = {
+    enable = true;
+    userName = "Adriano Santos";
+    userEmail = "adriano@sotnas.net";
+    signing = {
+      key = null; # TODO: preencher com GPG key ID
+      signByDefault = true;
+    };
+    extraConfig = {
+      init.defaultBranch = "main";
+      pull.rebase = true;
+      push.autoSetupRemote = true;
+      core.editor = "nvim";
+    };
+  };
+
   # --- Starship (migrado de starship.toml) ---
   programs.starship = {
     enable = true;
@@ -93,6 +110,12 @@
   xdg.configFile."bat/themes" = {
     source = config.lib.file.mkOutOfStoreSymlink
       "/Users/adrianofsantos/repos/github/dotfiles/bat/themes";
+  };
+
+  # --- Bpytop (migrado de bpytop/) ---
+  xdg.configFile."bpytop" = {
+    source = config.lib.file.mkOutOfStoreSymlink
+      "/Users/adrianofsantos/repos/github/dotfiles/bpytop";
   };
 
   # --- Alacritty (migrado de alacritty/) ---
