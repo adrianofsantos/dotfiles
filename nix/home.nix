@@ -78,7 +78,7 @@
     userName = "Adriano Santos";
     userEmail = "adriano@sotnas.net";
     signing = {
-      key = null; # TODO: preencher com GPG key ID
+      key = "16D7D0D901DE83FB";
       signByDefault = true;
     };
     extraConfig = {
@@ -122,6 +122,18 @@
   xdg.configFile."alacritty" = {
     source = config.lib.file.mkOutOfStoreSymlink
       "/Users/adrianofsantos/repos/github/dotfiles/alacritty";
+  };
+
+  # --- Raycast (sem extensions/ — está no .gitignore) ---
+  xdg.configFile."raycast" = {
+    source = config.lib.file.mkOutOfStoreSymlink
+      "/Users/adrianofsantos/repos/github/dotfiles/raycast";
+  };
+
+  # --- qBittorrent ---
+  xdg.configFile."qBittorrent" = {
+    source = config.lib.file.mkOutOfStoreSymlink
+      "/Users/adrianofsantos/repos/github/dotfiles/qBittorrent";
   };
 
   # --- Neovim (manter LazyVim como está, só referenciar a pasta) ---
