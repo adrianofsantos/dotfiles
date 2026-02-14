@@ -23,32 +23,13 @@
       fonts.packages = with pkgs; [
         nerd-fonts.hack
       ];
-      # List packages installed in system profile. To search by name, run:
-      # $ nix-env -qaP | grep wgepkgs.wgett
+      # System-level packages (available to all users)
       environment.systemPackages = [
-        pkgs.bat
-        pkgs.eza
-        pkgs.fastfetch
-        pkgs.fd
-        pkgs.fzf
         pkgs.gcal
-        pkgs.gitleaks
         pkgs.gnupg
         pkgs.htop
         pkgs.imagemagick
         pkgs.ipcalc
-        pkgs.jq
-        pkgs.krew
-        pkgs.kubecolor
-        pkgs.kubectx
-        pkgs.lazydocker
-        pkgs.lazygit
-        pkgs.neovim
-        pkgs.ripgrep
-        pkgs.starship
-        pkgs.tree
-        pkgs.wget
-        pkgs.zoxide
       ];
 
       homebrew = {
