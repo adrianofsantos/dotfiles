@@ -43,18 +43,9 @@ This installs: all system packages, homebrew casks, Mac App Store apps, configur
 
 First build takes ~15-30 min (downloads nixpkgs, compiles some packages, installs homebrew casks).
 
-### 5. Apply Dotfiles
+### 5. Post-Bootstrap Checklist
 
-**Current (stow):**
-```bash
-cd ~/repos/github/dotfiles
-./config.sh
-```
-
-**After home-manager migration:**
-Dotfiles are applied automatically by `darwin-rebuild switch`.
-
-### 6. Post-Bootstrap Checklist
+Dotfiles are applied automatically by `darwin-rebuild switch` via home-manager.
 
 - [ ] SSH key added to GitHub (done in step 1)
 - [ ] GPG key configured (if using signed commits)
@@ -92,6 +83,14 @@ darwinConfigurations."NewHost" = nix-darwin.lib.darwinSystem {
     newHostConfiguration
     nix-homebrew.darwinModules.nix-homebrew
     rosettaHomebrewModule
+    home-manager.darwinModules.home-manager
+    {
+      home-manager = {
+        useGlobalPkgs = true;
+        useUserPackages = true;
+        users.adrianofsantos = import ./home.nix;
+      };
+    }
   ];
 };
 ```

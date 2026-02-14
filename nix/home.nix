@@ -5,6 +5,28 @@
   home.homeDirectory = "/Users/adrianofsantos";
   home.stateVersion = "24.05";
 
+  # --- User packages (migrados de environment.systemPackages) ---
+  home.packages = with pkgs; [
+    bat
+    eza
+    fastfetch
+    fd
+    fzf
+    gitleaks
+    jq
+    krew
+    kubecolor
+    kubectx
+    lazydocker
+    lazygit
+    neovim
+    ripgrep
+    starship
+    tree
+    wget
+    zoxide
+  ];
+
   # --- ZSH (migrado de zsh/.zshrc + aliases.zsh + functions.zsh) ---
   programs.zsh = {
     enable = true;
