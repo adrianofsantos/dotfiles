@@ -179,17 +179,17 @@
           "claude-code"
           "discord"
           "docker-desktop"
-          "duckduckgo"
           "ollama-app"
           "proton-drive"
           "qbittorrent"
           "samsung-magician"
-          "shortcat"
+          "steam"
           "tradingview"
           "visual-studio-code"
         ];
         brews = [
           "gemini-cli"
+          "irssi"
         ];
         masApps = {
           "HP Smart" = 1474276998;
