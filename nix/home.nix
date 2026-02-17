@@ -152,12 +152,6 @@
       "/Users/adrianofsantos/repos/github/dotfiles/raycast";
   };
 
-  # --- qBittorrent ---
-  xdg.configFile."qBittorrent" = {
-    source = config.lib.file.mkOutOfStoreSymlink
-      "/Users/adrianofsantos/repos/github/dotfiles/qBittorrent";
-  };
-
   # --- Neovim (manter LazyVim como está, só referenciar a pasta) ---
   xdg.configFile."nvim" = {
     source = config.lib.file.mkOutOfStoreSymlink
