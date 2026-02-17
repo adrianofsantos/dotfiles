@@ -75,9 +75,6 @@
       alias -s yml=nvim
       alias -s json=nvim
 
-      # Zoxide
-      eval "$(zoxide init zsh)"
-
       # gitignore.io helper
       function gi() { curl -sLw "\n" https://www.toptal.com/developers/gitignore/api/$@ ;}
 
@@ -92,6 +89,12 @@
       VISUAL = "nvim";
       NIX_CONF_DIR = "$HOME/.config/nix";
     };
+  };
+
+  # --- Zoxide ---
+  programs.zoxide = {
+    enable = true;
+    enableZshIntegration = true;
   };
 
   # --- Git ---
