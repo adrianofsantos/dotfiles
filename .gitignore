@@ -10,7 +10,7 @@ vim/lazy-lock.json
 .LSOverride
 
 # Icon must end with two \r
-Icon
+Icon
 
 # Thumbnails
 ._*
@@ -48,3 +48,6 @@ id_rsa
 id_ed25519
 *.p12
 *.pfx
+
+# FUSE temp files
+.fuse_hidden*
