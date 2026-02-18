@@ -1,5 +1,8 @@
 { config, pkgs, ... }:
 
+let
+  dotfilesPath = "/Users/adrianofsantos/repos/github/dotfiles";
+in
 {
   home.username = "adrianofsantos";
   home.homeDirectory = "/Users/adrianofsantos";
@@ -7,7 +10,8 @@
 
   # --- User packages (migrados de environment.systemPackages) ---
   home.packages = with pkgs; [
-    bat
+    # bat, starship e zoxide são instalados via programs.* abaixo
+    bpytop
     eza
     fastfetch
     fd
@@ -21,10 +25,8 @@
     lazygit
     neovim
     ripgrep
-    starship
     tree
     wget
-    zoxide
   ];
 
   # --- ZSH (migrado de zsh/.zshrc + aliases.zsh + functions.zsh) ---
@@ -52,9 +54,25 @@
 
       # Git
       g = "git";
-      gc = "git commit";
-      gco = "git checkout";
       ga = "git add";
+      gc = "git commit";
+      gca = "git commit --amend";
+      gcan = "git commit --amend --no-edit";
+      gco = "git checkout";
+      gcp = "git cherry-pick";
+      gd = "git diff";
+      gds = "git diff --staged";
+      gl = "git log --oneline --graph --decorate -20";
+      gp = "git push";
+      gpl = "git pull";
+      gb = "git branch";
+      gsw = "git switch";
+      gsc = "git switch -c";
+      gst = "git stash";
+      gstp = "git stash pop";
+      grb = "git rebase";
+      grbi = "git rebase -i";
+      gs = "git status";
 
       # Nix
       dr = "sudo darwin-rebuild switch --flake ~/repos/github/dotfiles/nix/";
@@ -121,7 +139,7 @@
   };
   xdg.configFile."starship.toml" = {
     source = config.lib.file.mkOutOfStoreSymlink
-      "/Users/adrianofsantos/repos/github/dotfiles/starship.toml";
+      "${dotfilesPath}/starship.toml";
   };
 
   # --- Bat (migrado de bat/) ---
@@ -134,31 +152,25 @@
   };
   xdg.configFile."bat/themes" = {
     source = config.lib.file.mkOutOfStoreSymlink
-      "/Users/adrianofsantos/repos/github/dotfiles/bat/themes";
+      "${dotfilesPath}/bat/themes";
   };
 
-  # --- Bpytop (migrado de bpytop/) ---
+  # --- Bpytop ---
   xdg.configFile."bpytop" = {
     source = config.lib.file.mkOutOfStoreSymlink
-      "/Users/adrianofsantos/repos/github/dotfiles/bpytop";
-  };
-
-  # --- Alacritty (migrado de alacritty/) ---
-  xdg.configFile."alacritty" = {
-    source = config.lib.file.mkOutOfStoreSymlink
-      "/Users/adrianofsantos/repos/github/dotfiles/alacritty";
+      "${dotfilesPath}/bpytop";
   };
 
   # --- Raycast (sem extensions/ — está no .gitignore) ---
   xdg.configFile."raycast" = {
     source = config.lib.file.mkOutOfStoreSymlink
-      "/Users/adrianofsantos/repos/github/dotfiles/raycast";
+      "${dotfilesPath}/raycast";
   };
 
   # --- Neovim (manter LazyVim como está, só referenciar a pasta) ---
   xdg.configFile."nvim" = {
     source = config.lib.file.mkOutOfStoreSymlink
-      "/Users/adrianofsantos/repos/github/dotfiles/nvim";
+      "${dotfilesPath}/nvim";
   };
 
   # --- Claude Code ---
