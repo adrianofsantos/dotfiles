@@ -45,6 +45,7 @@
           "warp"
         ];
         brews = [
+          "bpytop"
           "gh"
           "watch"
           "mas"

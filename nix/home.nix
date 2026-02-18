@@ -11,7 +11,7 @@ in
   # --- User packages (migrados de environment.systemPackages) ---
   home.packages = with pkgs; [
     # bat, starship e zoxide são instalados via programs.* abaixo
-    bpytop
+    # bpytop fica no homebrew.brews (não disponível no nixpkgs)
     eza
     fastfetch
     fd
@@ -113,6 +113,7 @@ in
   programs.zoxide = {
     enable = true;
     enableZshIntegration = true;
+    options = [ "--cmd cd" ];
   };
 
   # --- Git ---
