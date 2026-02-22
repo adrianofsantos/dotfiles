@@ -158,9 +158,13 @@
       "/Users/adrianofsantos/repos/github/dotfiles/nvim";
   };
 
-  # --- Claude Code status line ---
+  # --- Claude Code ---
   home.file.".claude/statusline-command.sh" = {
     source = config.lib.file.mkOutOfStoreSymlink
       "/Users/adrianofsantos/repos/github/dotfiles/claude/statusline-command.sh";
+  };
+  home.file.".claude/settings.json" = {
+    source = config.lib.file.mkOutOfStoreSymlink
+      "/Users/adrianofsantos/repos/github/dotfiles/claude/settings.json";
   };
 }
