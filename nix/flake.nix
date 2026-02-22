@@ -120,6 +120,8 @@
       homebrew = {
         enable = true;
         casks = [
+          "claude"
+          "claude-code"
           "fuse-t"
           "proton-drive"
           "proton-mail"
@@ -155,10 +157,8 @@
           "/Applications/Brave Browser.app"
           "/Applications/Warp.app"
           "/Applications/Obsidian.app"
-          "/Applications/qbittorrent.app"
           "/Applications/Telegram.app"
           "/Applications/WhatsApp.app"
-          "/Applications/Discord.app"
           "/Applications/Proton Mail.app"
           "/System/Applications/Automator.app"
           "/System/Applications/Calendar.app"
@@ -175,8 +175,6 @@
         casks = [
           "balenaetcher"
           "calibre"
-          "claude"
-          "claude-code"
           "discord"
           "docker-desktop"
           "ollama-app"
