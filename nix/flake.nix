@@ -177,6 +177,7 @@
           "calibre"
           "discord"
           "docker-desktop"
+          "obs"
           "ollama-app"
           "proton-drive"
           "qbittorrent"
