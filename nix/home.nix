@@ -13,8 +13,14 @@ let
     };
     dontBuild = true;
     installPhase = ''
+      mkdir -p $out/Applications
+      cp -r cryptomator-cli.app $out/Applications/
+
       mkdir -p $out/bin
-      cp cryptomator-cli $out/bin/
+      cat > $out/bin/cryptomator-cli << EOF
+      #!/bin/sh
+      exec "$out/Applications/cryptomator-cli.app/Contents/MacOS/cryptomator-cli" "\$@"
+      EOF
       chmod +x $out/bin/cryptomator-cli
     '';
   };
