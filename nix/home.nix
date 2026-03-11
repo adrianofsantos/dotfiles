@@ -12,6 +12,7 @@ in
   home.packages = with pkgs; [
     # bat, starship e zoxide são instalados via programs.* abaixo
     # bpytop fica no homebrew.brews (não disponível no nixpkgs)
+    cryptomator-cli
     eza
     fastfetch
     fd
@@ -100,6 +101,7 @@ in
       fpath=(/Users/adrianofsantos/.docker/completions $fpath)
       autoload -Uz compinit
       compinit
+
     '';
 
     sessionVariables = {
