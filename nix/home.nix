@@ -8,7 +8,7 @@ let
     version = "0.6.1";
     src = pkgs.fetchzip {
       url = "https://github.com/cryptomator/cli/releases/download/${version}/cryptomator-cli-${version}-mac-arm64.zip";
-      sha256 = "sha256-pQSX6XYki50NnTtsbSFxU7TP+Mm+J3+gXQcoSBQtkZs=";
+      sha256 = "sha256-wtaqTlU+NVR6Qg/8mXkN96LB1S6IiGrLDVzuyxTNeSs=";
       stripRoot = false;
     };
     dontBuild = true;
