@@ -12,7 +12,6 @@
     };
   };
 
-  #outputs = inputs@{ self, nix-darwin, nixpkgs, nix-homebrew, homebrew-bundle }:
   outputs = inputs@{ self, nix-darwin, nixpkgs, nix-homebrew, home-manager }:
   let
     commonConfiguration = { pkgs, ... }: {
@@ -50,9 +49,6 @@
           "watch"
           "mas"
         ];
-        masApps = {
-          "Perplexity ask anything" = 6714467650;
-        };
         onActivation.cleanup = "zap";
         onActivation.autoUpdate = true;
         onActivation.upgrade = true;
@@ -72,10 +68,6 @@
         menuExtraClock.ShowDate = 0;
       };
       
-      # Descontinuado.
-      #security.pam.enableSudoTouchIdAuth = true;
-      #nix.useDaemon = true;
-      # Substituição dos itens acima
       security.pam.services.sudo_local.touchIdAuth = true; #default false
       nix.enable = true; #defaul true
 
@@ -100,9 +92,6 @@
           options = "--delete-older-than 7d";
         };
       };
-
-      # Enable alternative shell support in nix-darwin.
-      # programs.fish.enable = true;
 
       # Set Git commit hash for darwin-version.
       system.configurationRevision = self.rev or self.dirtyRev or null;
@@ -173,6 +162,7 @@
       homebrew = {
         enable = true;
         casks = [
+          "android-studio"
           "balenaetcher"
           "calibre"
           "discord"
@@ -213,10 +203,8 @@
           "/System/Applications/System Settings.app"
         ];
         loginwindow = {
-          GuestEnabled = false;
           SHOWFULLNAME = false;
         };
-        screensaver.askForPasswordDelay = 10;
       };
       nixpkgs.hostPlatform = "aarch64-darwin";
     };
