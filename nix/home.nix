@@ -2,6 +2,22 @@
 
 let
   dotfilesPath = "/Users/adrianofsantos/repos/github/dotfiles";
+
+  cryptomator-cli = pkgs.stdenv.mkDerivation rec {
+    pname = "cryptomator-cli";
+    version = "0.6.1";
+    src = pkgs.fetchzip {
+      url = "https://github.com/cryptomator/cli/releases/download/${version}/cryptomator-cli-${version}-mac-arm64.zip";
+      sha256 = "sha256-pQSX6XYki50NnTtsbSFxU7TP+Mm+J3+gXQcoSBQtkZs=";
+      stripRoot = false;
+    };
+    dontBuild = true;
+    installPhase = ''
+      mkdir -p $out/bin
+      cp cryptomator-cli $out/bin/
+      chmod +x $out/bin/cryptomator-cli
+    '';
+  };
 in
 {
   home.username = "adrianofsantos";
@@ -12,6 +28,7 @@ in
   home.packages = with pkgs; [
     # bat, starship e zoxide são instalados via programs.* abaixo
     # bpytop fica no homebrew.brews (não disponível no nixpkgs)
+    cryptomator-cli
     eza
     fastfetch
     fd
