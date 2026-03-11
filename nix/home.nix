@@ -137,13 +137,13 @@ in
   # --- Git ---
   programs.git = {
     enable = true;
-    userName = "Adriano Santos";
-    userEmail = "adriano@sotnas.net";
     signing = {
       key = "16D7D0D901DE83FB";
       signByDefault = true;
     };
-    extraConfig = {
+    settings = {
+      user.name = "Adriano Santos";
+      user.email = "adriano@sotnas.net";
       init.defaultBranch = "main";
       pull.rebase = true;
       push.autoSetupRemote = true;
