@@ -40,6 +40,12 @@ nix/
 - **home-common.nix** contém toda a config compartilhada — hosts só declaram divergências
 - **fuse-t** permanece no `personal.nix` pois o Cryptomator depende dele para montar volumes no macOS
 
+## Segurança
+
+- `nix/user.nix` está criptografado com git-crypt — ao clonar em máquina nova rodar `git-crypt unlock` após configurar a chave GPG
+- Antes de `git-crypt add-gpg-user`, definir confiança GPG: `gpg --fingerprint --with-colons <KEY_ID> | awk -F: '/^fpr/{print $10":6:"}' | gpg --import-ownertrust`
+- `nix/user.nix.example` existe como template público — `user.nix` real nunca aparece em plaintext no repositório remoto
+
 ## Rebuild
 
 ```bash
