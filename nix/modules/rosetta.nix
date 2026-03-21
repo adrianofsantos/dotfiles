@@ -1,10 +1,10 @@
-{ pkgs, ... }:
+{ pkgs, user, ... }:
 
 {
   nix-homebrew = {
     enable = true;
     enableRosetta = pkgs.stdenv.hostPlatform.isAarch64;
-    user = "adrianofsantos";
+    user = user.username;
     autoMigrate = true;
   };
 }

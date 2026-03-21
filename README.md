@@ -6,7 +6,7 @@ Configuração declarativa de macOS via [nix-darwin](https://github.com/nix-darw
 
 | Host | Máquina | Papel |
 |------|---------|-------|
-| **Aang** | MacBook Air (Apple Silicon) | Backup pessoal / máquina principal da esposa |
+| **Aang** | MacBook Air (Apple Silicon) | Máquina secundária / uso geral |
 | **Kyoshi** | MacBook Pro (Apple Silicon) | Máquina principal de desenvolvimento |
 
 ## Estrutura
@@ -15,6 +15,7 @@ Configuração declarativa de macOS via [nix-darwin](https://github.com/nix-darw
 dotfiles/
 ├── nix/
 │   ├── flake.nix              # Entrada principal — composição dos hosts
+│   ├── user.nix               # Dados do usuário (único arquivo a editar ao fazer fork)
 │   ├── flake.lock             # Dependências fixadas
 │   ├── home-common.nix        # Base compartilhada do home-manager
 │   ├── home-aang.nix          # Home do Aang (importa common)
@@ -60,6 +61,29 @@ hosts/kyoshi.nix      →  dock, casks e brews exclusivos da Kyoshi
 | Pacote Nix só para a Kyoshi | `hosts/kyoshi.nix` |
 | Ferramenta de linha de comando no shell | `home-common.nix` → `home.packages` |
 | Ferramenta só na Kyoshi (ex: Docker) | `home-kyoshi.nix` → `home.packages` |
+
+## git-crypt — setup em máquina nova
+
+O arquivo `nix/user.nix` é commitado criptografado via git-crypt. Ao configurar uma máquina nova:
+
+```bash
+# 1. Clonar o repositório normalmente
+git clone <repo> ~/repos/github/dotfiles
+
+# 2. Definir confiança máxima na sua chave GPG (necessário apenas uma vez por máquina)
+gpg --fingerprint --with-colons <KEY_ID> | awk -F: '/^fpr/{print $10":6:"}' | gpg --import-ownertrust
+
+# 3. Descriptografar os arquivos protegidos
+git-crypt unlock
+
+# 4. Verificar se user.nix está legível
+cat ~/repos/github/dotfiles/nix/user.nix
+```
+
+> Se precisar adicionar uma nova chave GPG como autorizada:
+> ```bash
+> git-crypt add-gpg-user <FINGERPRINT>
+> ```
 
 ## Comandos
 

@@ -1,8 +1,6 @@
-{ config, pkgs, ... }:
+{ config, pkgs, user, ... }:
 
 let
-  dotfilesPath = "/Users/adrianofsantos/repos/github/dotfiles";
-
   cryptomator-cli = pkgs.stdenv.mkDerivation rec {
     pname = "cryptomator-cli";
     version = "0.6.1";
@@ -26,8 +24,8 @@ let
   };
 in
 {
-  home.username = "adrianofsantos";
-  home.homeDirectory = "/Users/adrianofsantos";
+  home.username = user.username;
+  home.homeDirectory = user.homeDir;
   home.stateVersion = "24.05";
 
   home.packages = with pkgs; [
@@ -131,12 +129,12 @@ in
   programs.git = {
     enable = true;
     signing = {
-      key = "16D7D0D901DE83FB";
+      key = user.gpgKey;
       signByDefault = true;
     };
     settings = {
-      user.name = "Adriano Santos";
-      user.email = "adriano@sotnas.net";
+      user.name = user.fullName;
+      user.email = user.email;
       init.defaultBranch = "main";
       pull.rebase = true;
       push.autoSetupRemote = true;
@@ -149,7 +147,7 @@ in
     enableZshIntegration = true;
   };
   xdg.configFile."starship.toml" = {
-    source = config.lib.file.mkOutOfStoreSymlink "${dotfilesPath}/starship.toml";
+    source = config.lib.file.mkOutOfStoreSymlink "${user.dotfilesDir}/starship.toml";
   };
 
   programs.bat = {
@@ -158,25 +156,25 @@ in
     syntaxes = {};
   };
   xdg.configFile."bat/themes" = {
-    source = config.lib.file.mkOutOfStoreSymlink "${dotfilesPath}/bat/themes";
+    source = config.lib.file.mkOutOfStoreSymlink "${user.dotfilesDir}/bat/themes";
   };
 
   xdg.configFile."bpytop" = {
-    source = config.lib.file.mkOutOfStoreSymlink "${dotfilesPath}/bpytop";
+    source = config.lib.file.mkOutOfStoreSymlink "${user.dotfilesDir}/bpytop";
   };
 
   xdg.configFile."raycast" = {
-    source = config.lib.file.mkOutOfStoreSymlink "${dotfilesPath}/raycast";
+    source = config.lib.file.mkOutOfStoreSymlink "${user.dotfilesDir}/raycast";
   };
 
   xdg.configFile."nvim" = {
-    source = config.lib.file.mkOutOfStoreSymlink "${dotfilesPath}/nvim";
+    source = config.lib.file.mkOutOfStoreSymlink "${user.dotfilesDir}/nvim";
   };
 
   home.file.".claude/statusline-command.sh" = {
-    source = config.lib.file.mkOutOfStoreSymlink "${dotfilesPath}/claude/statusline-command.sh";
+    source = config.lib.file.mkOutOfStoreSymlink "${user.dotfilesDir}/claude/statusline-command.sh";
   };
   home.file.".claude/settings.json" = {
-    source = config.lib.file.mkOutOfStoreSymlink "${dotfilesPath}/claude/settings.json";
+    source = config.lib.file.mkOutOfStoreSymlink "${user.dotfilesDir}/claude/settings.json";
   };
 }

@@ -1,8 +1,8 @@
-{ pkgs, self, ... }:
+{ pkgs, self, user, ... }:
 
 {
-  system.primaryUser = "adrianofsantos";
-  users.users.adrianofsantos.home = "/Users/adrianofsantos";
+  system.primaryUser = user.username;
+  users.users.${user.username}.home = user.homeDir;
   nixpkgs.config.allowUnfree = false;
   nixpkgs.hostPlatform = "aarch64-darwin"; # ambas as máquinas são Apple Silicon
 
@@ -12,6 +12,7 @@
 
   environment.systemPackages = with pkgs; [
     gcal
+    git-crypt
     gnupg
     htop
     imagemagick

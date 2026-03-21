@@ -1,7 +1,7 @@
 # Contexto para Claude
 
 Repositório de dotfiles para macOS com nix-darwin + home-manager.
-Dois hosts Apple Silicon: **Aang** (MacBook Air, backup/esposa) e **Kyoshi** (MacBook Pro, desenvolvimento principal).
+Dois hosts Apple Silicon: **Aang** (MacBook Air, uso secundário) e **Kyoshi** (MacBook Pro, desenvolvimento principal).
 
 ## Estrutura dos módulos Nix
 
@@ -27,7 +27,9 @@ nix/
 
 - Listas Homebrew (`casks`, `brews`) são **mergeadas automaticamente** pelo módulo system — cada módulo só declara o seu incremento, sem repetir o que já está no common
 - `nixpkgs.hostPlatform = "aarch64-darwin"` está em `common.nix` — vale para ambos os hosts
-- `specialArgs = { inherit self; }` é necessário para passar `self.rev` ao `common.nix`
+- `specialArgs = { inherit self user; }` passa `self.rev` e dados do usuário aos módulos do sistema
+- `extraSpecialArgs = { inherit user; }` passa os mesmos dados aos módulos do home-manager
+- Dados pessoais (username, email, gpgKey, paths) estão centralizados em `user.nix` — único arquivo a editar ao fazer fork
 - `home-manager` usa `lib.mkAfter` para concatenar `initContent` de zsh entre módulos
 - ProtonVPN e ProtonDrive usam Login Items nativos do macOS — o `proton.nix` só desativa o App Nap, sem LaunchAgents (que causavam duplicação de processos)
 

@@ -13,10 +13,13 @@
   };
 
   outputs = inputs@{ self, nix-darwin, nixpkgs, nix-homebrew, home-manager }:
+  let
+    user = import ./user.nix;
+  in
   {
     # $ darwin-rebuild switch --flake .#Aang
     darwinConfigurations."Aang" = nix-darwin.lib.darwinSystem {
-      specialArgs = { inherit self; };
+      specialArgs = { inherit self user; };
       modules = [
         ./modules/common.nix
         ./modules/personal.nix
@@ -31,7 +34,8 @@
           home-manager = {
             useGlobalPkgs = true;
             useUserPackages = true;
-            users.adrianofsantos = import ./home-aang.nix;
+            extraSpecialArgs = { inherit user; };
+            users.${user.username} = import ./home-aang.nix;
           };
         }
       ];
@@ -39,7 +43,7 @@
 
     # $ darwin-rebuild switch --flake .#Kyoshi
     darwinConfigurations."Kyoshi" = nix-darwin.lib.darwinSystem {
-      specialArgs = { inherit self; };
+      specialArgs = { inherit self user; };
       modules = [
         ./modules/common.nix
         ./modules/personal.nix
@@ -53,7 +57,8 @@
           home-manager = {
             useGlobalPkgs = true;
             useUserPackages = true;
-            users.adrianofsantos = import ./home-kyoshi.nix;
+            extraSpecialArgs = { inherit user; };
+            users.${user.username} = import ./home-kyoshi.nix;
           };
         }
       ];
