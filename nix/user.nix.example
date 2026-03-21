@@ -1,0 +1,10 @@
+# Copie este arquivo para user.nix e preencha com seus dados.
+# user.nix está no .gitignore e não será commitado.
+{
+  username    = "seu-usuario";
+  fullName    = "Seu Nome";
+  email       = "seu@email.com";
+  gpgKey      = "SUA_GPG_KEY_ID";
+  homeDir     = "/Users/seu-usuario";
+  dotfilesDir = "/Users/seu-usuario/repos/github/dotfiles";
+}
