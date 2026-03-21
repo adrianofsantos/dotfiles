@@ -30,10 +30,7 @@ in
   home.homeDirectory = "/Users/adrianofsantos";
   home.stateVersion = "24.05";
 
-  # --- User packages (migrados de environment.systemPackages) ---
   home.packages = with pkgs; [
-    # bat, starship e zoxide são instalados via programs.* abaixo
-    # bpytop fica no homebrew.brews (não disponível no nixpkgs)
     cryptomator-cli
     eza
     fastfetch
@@ -44,7 +41,6 @@ in
     krew
     kubecolor
     kubectx
-    lazydocker
     lazygit
     neovim
     ripgrep
@@ -52,7 +48,6 @@ in
     wget
   ];
 
-  # --- ZSH (migrado de zsh/.zshrc + aliases.zsh + functions.zsh) ---
   programs.zsh = {
     enable = true;
 
@@ -118,12 +113,6 @@ in
 
       # gitignore.io helper
       function gi() { curl -sLw "\n" https://www.toptal.com/developers/gitignore/api/$@ ;}
-
-      # Docker CLI completions
-      fpath=(/Users/adrianofsantos/.docker/completions $fpath)
-      autoload -Uz compinit
-      compinit
-
     '';
 
     sessionVariables = {
@@ -133,14 +122,12 @@ in
     };
   };
 
-  # --- Zoxide ---
   programs.zoxide = {
     enable = true;
     enableZshIntegration = true;
     options = [ "--cmd cd" ];
   };
 
-  # --- Git ---
   programs.git = {
     enable = true;
     signing = {
@@ -157,54 +144,39 @@ in
     };
   };
 
-  # --- Starship (migrado de starship.toml) ---
   programs.starship = {
     enable = true;
     enableZshIntegration = true;
   };
   xdg.configFile."starship.toml" = {
-    source = config.lib.file.mkOutOfStoreSymlink
-      "${dotfilesPath}/starship.toml";
+    source = config.lib.file.mkOutOfStoreSymlink "${dotfilesPath}/starship.toml";
   };
 
-  # --- Bat (migrado de bat/) ---
   programs.bat = {
     enable = true;
-    config = {
-      theme = "Catppuccin-frappe";
-    };
+    config.theme = "Catppuccin-frappe";
     syntaxes = {};
   };
   xdg.configFile."bat/themes" = {
-    source = config.lib.file.mkOutOfStoreSymlink
-      "${dotfilesPath}/bat/themes";
+    source = config.lib.file.mkOutOfStoreSymlink "${dotfilesPath}/bat/themes";
   };
 
-  # --- Bpytop ---
   xdg.configFile."bpytop" = {
-    source = config.lib.file.mkOutOfStoreSymlink
-      "${dotfilesPath}/bpytop";
+    source = config.lib.file.mkOutOfStoreSymlink "${dotfilesPath}/bpytop";
   };
 
-  # --- Raycast (sem extensions/ — está no .gitignore) ---
   xdg.configFile."raycast" = {
-    source = config.lib.file.mkOutOfStoreSymlink
-      "${dotfilesPath}/raycast";
+    source = config.lib.file.mkOutOfStoreSymlink "${dotfilesPath}/raycast";
   };
 
-  # --- Neovim (manter LazyVim como está, só referenciar a pasta) ---
   xdg.configFile."nvim" = {
-    source = config.lib.file.mkOutOfStoreSymlink
-      "${dotfilesPath}/nvim";
+    source = config.lib.file.mkOutOfStoreSymlink "${dotfilesPath}/nvim";
   };
 
-  # --- Claude Code ---
   home.file.".claude/statusline-command.sh" = {
-    source = config.lib.file.mkOutOfStoreSymlink
-      "/Users/adrianofsantos/repos/github/dotfiles/claude/statusline-command.sh";
+    source = config.lib.file.mkOutOfStoreSymlink "${dotfilesPath}/claude/statusline-command.sh";
   };
   home.file.".claude/settings.json" = {
-    source = config.lib.file.mkOutOfStoreSymlink
-      "/Users/adrianofsantos/repos/github/dotfiles/claude/settings.json";
+    source = config.lib.file.mkOutOfStoreSymlink "${dotfilesPath}/claude/settings.json";
   };
 }
