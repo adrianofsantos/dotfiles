@@ -1,114 +1,236 @@
-# Bootstrap Reference — New Machine Setup
+# Bootstrap — Configuração de máquina nova
 
-## Prerequisites
+Guia completo para configurar um Mac novo (ou recém-formatado) do zero usando este repositório.
 
-- macOS (Apple Silicon)
-- Admin access
-- Internet connection
+## Pré-requisitos
 
-## Bootstrap Sequence
+- macOS em Apple Silicon (M1+)
+- Acesso de administrador
+- Conexão com a internet
+- Acesso à chave GPG privada (exportada de outra máquina ou backup)
 
-### 1. Generate SSH Key (if needed)
+## Etapas
+
+### 1. Instalar o Nix
+
+```bash
+curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
+```
+
+Usar o instalador da Determinate Systems — lida melhor com as particularidades do macOS e configura o daemon automaticamente. Após instalar, abrir um terminal novo para que o `nix` esteja no PATH.
+
+### 2. Gerar chave SSH e adicionar ao GitHub
+
 ```bash
 ssh-keygen -t ed25519 -C "adriano.chico@gmail.com"
 eval "$(ssh-agent -s)"
 ssh-add ~/.ssh/id_ed25519
-# Copy public key and add to GitHub → Settings → SSH Keys
+
+# Copiar chave pública para a área de transferência
 cat ~/.ssh/id_ed25519.pub | pbcopy
 ```
 
-### 2. Install Nix
-```bash
-curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
-```
-The Determinate Systems installer is recommended over official — handles macOS quirks better, auto-configures daemon.
+Ir em [GitHub → Settings → SSH Keys](https://github.com/settings/keys) e adicionar a chave copiada.
 
-### 3. Clone Dotfiles
+### 3. Clonar o repositório
+
 ```bash
 mkdir -p ~/repos/github
 cd ~/repos/github
 git clone git@github.com:adrianofsantos/dotfiles.git
-# or with HTTPS if SSH not yet configured:
-# git clone https://github.com/adrianofsantos/dotfiles.git
 ```
 
-### 4. First Build
+Se o SSH ainda não estiver configurado, usar HTTPS temporariamente:
+```bash
+git clone https://github.com/adrianofsantos/dotfiles.git
+```
+
+### 4. Importar chave GPG
+
+A chave GPG é necessária para duas coisas: descriptografar `user.nix` (git-crypt) e assinar commits. Transferir a chave privada da outra máquina ou de um backup.
+
+**Na máquina de origem (ex: Kyoshi):**
+```bash
+gpg --export-secret-keys 16D7D0D901DE83FB > ~/gpg-private.key
+# Transferir o arquivo para a máquina nova (AirDrop, USB, etc.)
+```
+
+**Na máquina nova:**
+```bash
+gpg --import gpg-private.key
+rm gpg-private.key  # apagar após importar
+```
+
+Definir confiança máxima na chave (necessário para que o git-crypt aceite a chave):
+```bash
+gpg --fingerprint --with-colons 16D7D0D901DE83FB | \
+  awk -F: '/^fpr/{print $10":6:"}' | \
+  gpg --import-ownertrust
+```
+
+Verificar se a chave está correta:
+```bash
+gpg --list-secret-keys
+```
+
+### 5. Descriptografar user.nix (git-crypt)
+
+O `git-crypt` e o `gnupg` são instalados pelo nix-darwin (em `common.nix`), mas **o primeiro build depende de `user.nix` estar decriptado**. É um problema de chicken-and-egg. A solução é instalar temporariamente via nix profile:
+
+```bash
+nix profile install nixpkgs#git-crypt nixpkgs#gnupg
+```
+
+Agora descriptografar:
+```bash
+cd ~/repos/github/dotfiles
+git-crypt unlock
+```
+
+Verificar se funcionou:
+```bash
+cat nix/user.nix
+# Deve mostrar o conteúdo nix legível, não bytes binários
+```
+
+### 6. Primeiro build
+
 ```bash
 cd ~/repos/github/dotfiles/nix
-# Replace HOSTNAME with Aang, Kyoshi, or new host name
-darwin-rebuild switch --flake .#HOSTNAME
+sudo darwin-rebuild switch --flake .#HOSTNAME
 ```
 
-This installs: all system packages, homebrew casks, Mac App Store apps, configures macOS defaults.
+Substituir `HOSTNAME` pelo nome da máquina: `Aang` ou `Kyoshi`.
 
-First build takes ~15-30 min (downloads nixpkgs, compiles some packages, installs homebrew casks).
+O primeiro build leva ~15-30 min (baixa nixpkgs, compila pacotes, instala Homebrew casks e Mac App Store apps).
 
-### 5. Post-Bootstrap Checklist
+### 7. Remover pacotes temporários
 
-Dotfiles are applied automatically by `darwin-rebuild switch` via home-manager.
+Após o build, `git-crypt` e `gnupg` já estão no sistema via nix-darwin. Remover as versões temporárias do nix profile:
 
-- [ ] SSH key added to GitHub (done in step 1)
-- [ ] GPG key configured (if using signed commits)
-- [ ] Run `gitleaks git -v --log-opts="--all" .` on dotfiles repo
-- [ ] Install pre-commit hook (see security reference)
-- [ ] Verify Proton apps auto-start (Kyoshi only — check launchd agents)
-- [ ] Verify dock apps are correct
-- [ ] Test `dr` alias (`darwin-rebuild switch`)
+```bash
+nix profile remove nixpkgs#git-crypt nixpkgs#gnupg
+```
 
-## Adding a New Host
+### 8. Abrir novo terminal
 
-1. Create host configuration in `flake.nix`:
-```nix
-newHostConfiguration = { pkgs, ... }: {
-  nixpkgs.hostPlatform = "aarch64-darwin"; # or x86_64-darwin
-  environment.systemPackages = [
-    # host-specific packages
-  ];
+Fechar e reabrir o terminal para que todas as configurações de shell (aliases, starship, zoxide, completions) sejam carregadas.
+
+## Checklist pós-instalação
+
+- [ ] `dr` funciona (rebuild rápido sem erros)
+- [ ] `git log --show-signature -1` mostra assinatura GPG válida
+- [ ] Dock mostra os apps corretos para o host
+- [ ] Proton apps iniciam automaticamente (via Login Items do macOS)
+- [ ] `cryptomator-cli --version` funciona
+- [ ] Neovim abre com LazyVim configurado (`v` no terminal)
+- [ ] Starship prompt aparece corretamente
+
+## Adicionar novo host
+
+### 1. Criar arquivo do host
+
+```bash
+# nix/hosts/novohost.nix
+{ ... }:
+
+{
   homebrew = {
-    enable = true;
-    casks = [ /* host-specific casks */ ];
+    casks = [
+      # casks exclusivos deste host
+    ];
+    brews = [
+      # brews exclusivos
+    ];
   };
+
   system.defaults = {
-    dock.persistent-apps = [ /* host dock apps */ ];
+    dock.persistent-apps = [
+      # apps no dock
+    ];
   };
-};
+}
 ```
 
-2. Add to darwinConfigurations:
+### 2. Criar home do host
+
+```bash
+# nix/home-novohost.nix
+{ pkgs, lib, ... }:
+
+{
+  imports = [ ./home-common.nix ];
+
+  # Pacotes exclusivos deste host
+  home.packages = with pkgs; [
+  ];
+}
+```
+
+### 3. Adicionar ao flake.nix
+
 ```nix
-darwinConfigurations."NewHost" = nix-darwin.lib.darwinSystem {
+darwinConfigurations."NovoHost" = nix-darwin.lib.darwinSystem {
+  specialArgs = { inherit self user; };
   modules = [
-    commonConfiguration
-    # personalConfiguration  # if personal machine
-    newHostConfiguration
+    ./modules/common.nix
+    ./modules/personal.nix
+    ./modules/macos-defaults.nix
+    ./modules/nix-settings.nix
+    ./hosts/novohost.nix
     nix-homebrew.darwinModules.nix-homebrew
-    rosettaHomebrewModule
+    ./modules/rosetta.nix
     home-manager.darwinModules.home-manager
     {
       home-manager = {
         useGlobalPkgs = true;
         useUserPackages = true;
-        users.adrianofsantos = import ./home.nix;
+        extraSpecialArgs = { inherit user; };
+        users.${user.username} = import ./home-novohost.nix;
       };
     }
   ];
 };
 ```
 
-3. Build: `darwin-rebuild switch --flake .#NewHost`
+### 4. Build
 
-## Linux Support (Future)
-
-For Ubuntu/Fedora, the nix-darwin modules won't apply. Strategy:
-- Use standalone home-manager (not nix-darwin module)
-- Share dotfiles configs via home-manager modules
-- System packages via distro package manager or nix profile
-- Create a separate `nixosConfigurations` or `homeConfigurations` output in flake.nix
-
-```nix
-# Future flake.nix addition:
-homeConfigurations."adriano@ubuntu" = home-manager.lib.homeManagerConfiguration {
-  pkgs = nixpkgs.legacyPackages.x86_64-linux;
-  modules = [ ./home-manager/common.nix ./home-manager/linux.nix ];
-};
+```bash
+sudo darwin-rebuild switch --flake ~/repos/github/dotfiles/nix/#NovoHost
 ```
+
+## Adicionar novo colaborador ao git-crypt
+
+Para que outra pessoa (ou outra chave GPG) possa descriptografar `user.nix`:
+
+```bash
+# Primeiro definir confiança na chave do colaborador
+gpg --fingerprint --with-colons <KEY_ID> | \
+  awk -F: '/^fpr/{print $10":6:"}' | \
+  gpg --import-ownertrust
+
+# Adicionar ao git-crypt (gera um commit automaticamente)
+git-crypt add-gpg-user <FINGERPRINT>
+```
+
+## Troubleshooting
+
+### `user.nix` aparece como binário
+```
+error: syntax error, unexpected end of file
+at nix/user.nix:1:2: GITCRYPT...
+```
+**Causa:** git-crypt não foi destrancado nesta máquina.
+**Solução:** `git-crypt unlock`
+
+### `nix search` mostra pacote que não existe no build
+**Causa:** `nix search nixpkgs` busca no registry global (geralmente unstable), não na versão pinada do flake.
+**Solução:** Buscar na versão correta:
+```bash
+nix search github:NixOS/nixpkgs/nixpkgs-25.11-darwin <pacote>
+```
+Ou verificar em [search.nixos.org](https://search.nixos.org/packages) com o canal correto selecionado.
+
+### Hash mismatch ao adicionar pacote customizado
+**Causa:** A versão do pacote mudou mas o hash não foi atualizado.
+**Solução:** O nix mostra o hash correto no erro. Usar o valor de `got:` para substituir o `sha256` na derivação.
