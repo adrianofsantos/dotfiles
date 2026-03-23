@@ -104,7 +104,20 @@ Substituir `HOSTNAME` pelo nome da máquina: `Aang` ou `Kyoshi`.
 
 O primeiro build leva ~15-30 min (baixa nixpkgs, compila pacotes, instala Homebrew casks e Mac App Store apps).
 
-### 7. Remover pacotes temporários
+### 7. Corrigir filtros do git-crypt
+
+O `git-crypt unlock` registra caminhos absolutos no `.git/config` (ex: `/nix/store/.../git-crypt`). Após o primeiro build, o `git-crypt` muda de lugar (de `nix profile` para `/run/current-system/sw/bin/`), e os filtros ficam apontando para o path antigo — causando erros como `No such file or directory` em cada operação git.
+
+Corrigir para usar PATH genérico:
+```bash
+cd ~/repos/github/dotfiles
+git config filter.git-crypt.smudge '"git-crypt" smudge'
+git config filter.git-crypt.clean '"git-crypt" clean'
+git config filter.git-crypt.required true
+git config diff.git-crypt.textconv '"git-crypt" diff'
+```
+
+### 8. Remover pacotes temporários
 
 Após o build, `git-crypt` e `gnupg` já estão no sistema via nix-darwin. Remover as versões temporárias do nix profile:
 
@@ -112,7 +125,7 @@ Após o build, `git-crypt` e `gnupg` já estão no sistema via nix-darwin. Remov
 nix profile remove nixpkgs#git-crypt nixpkgs#gnupg
 ```
 
-### 8. Abrir novo terminal
+### 9. Abrir novo terminal
 
 Fechar e reabrir o terminal para que todas as configurações de shell (aliases, starship, zoxide, completions) sejam carregadas.
 
@@ -230,6 +243,20 @@ at nix/user.nix:1:2: GITCRYPT...
 nix search github:NixOS/nixpkgs/nixpkgs-25.11-darwin <pacote>
 ```
 Ou verificar em [search.nixos.org](https://search.nixos.org/packages) com o canal correto selecionado.
+
+### `git-crypt: No such file or directory` em cada comando
+```
+--: /opt/homebrew/bin/git-crypt: No such file or directory
+```
+**Causa:** O `git-crypt unlock` registra caminhos absolutos nos filtros do `.git/config`. Se o binário mudou de lugar (ex: de homebrew/nix-profile para nix-darwin), os filtros ficam quebrados. O starship (prompt) checa git status a cada comando, disparando o erro repetidamente.
+**Solução:**
+```bash
+cd ~/repos/github/dotfiles
+git config filter.git-crypt.smudge '"git-crypt" smudge'
+git config filter.git-crypt.clean '"git-crypt" clean'
+git config filter.git-crypt.required true
+git config diff.git-crypt.textconv '"git-crypt" diff'
+```
 
 ### Hash mismatch ao adicionar pacote customizado
 **Causa:** A versão do pacote mudou mas o hash não foi atualizado.
