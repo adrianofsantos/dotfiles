@@ -123,7 +123,19 @@ sudo darwin-rebuild switch --flake .#HOSTNAME  # Aang ou Kyoshi
 
 Primeiro build leva ~15-30 min.
 
-### 5. Pós-instalação
+### 5. Corrigir filtros do git-crypt
+
+O `git-crypt unlock` registra caminhos absolutos nos filtros do `.git/config`. Após o build, o binário muda de lugar (de `nix profile` para `nix-darwin`), quebrando os filtros. Corrigir para usar PATH genérico:
+
+```bash
+cd ~/repos/github/dotfiles
+git config filter.git-crypt.smudge '"git-crypt" smudge'
+git config filter.git-crypt.clean '"git-crypt" clean'
+git config filter.git-crypt.required true
+git config diff.git-crypt.textconv '"git-crypt" diff'
+```
+
+### 6. Pós-instalação
 
 ```bash
 # Remover pacotes temporários (já estão no sistema via nix-darwin)
