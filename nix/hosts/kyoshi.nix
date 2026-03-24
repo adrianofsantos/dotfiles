@@ -21,9 +21,13 @@
     brews = [
       "gemini-cli"
       "irssi"
+      "opentofu"
+      "talhelper"
+      "xcodegen"
     ];
     masApps = {
       "HP Smart" = 1474276998;
+      "Xcode" = 497799835;
     };
     taps = [
     ];
