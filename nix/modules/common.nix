@@ -14,7 +14,6 @@
     gcal
     git-crypt
     gnupg
-    pinentry_mac
     htop
     imagemagick
     ipcalc
@@ -35,6 +34,7 @@
     brews = [
       "bpytop"
       "gh"
+      "pinentry-mac"
       "watch"
       "mas"
     ];

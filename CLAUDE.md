@@ -48,10 +48,14 @@ nix/
 
 ## GPG / Commit Signing
 
-- Pacote nixpkgs: `pinentry_mac` (underscore) — em `common.nix` junto ao `gnupg`
-- Agente configurado via `services.gpg-agent.pinentryPackage = pkgs.pinentry_mac` em `home-common.nix`
-- Após alterar configuração do gpg-agent: logout/login obrigatório (agente antigo continua rodando na sessão atual)
-- Sem pinentry configurado: `git commit` falha com `gpg: signing failed: No pinentry`
+- `pinentry-mac` via brew (em `common.nix` → `homebrew.brews`) — não nixpkgs
+- `~/.gnupg/gpg-agent.conf` gerenciado manualmente (não via home-manager) com `pinentry-program /opt/homebrew/bin/pinentry-mac`
+- Sem pinentry: `git commit` falha com `gpg: signing failed: No pinentry`
+- Após alterar gpg-agent: logout/login obrigatório (agente antigo continua na sessão)
+
+## home-manager — Gotchas
+
+- Se um arquivo já existe no sistema e o home-manager tenta gerenciá-lo, o rebuild falha com `would be clobbered` — remover o arquivo manualmente antes de rodar `dr`
 
 ## Rebuild
 
