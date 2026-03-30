@@ -43,16 +43,8 @@ nix/
 ## Segurança
 
 - `nix/user.nix` está criptografado com git-crypt — ao clonar em máquina nova rodar `git-crypt unlock` após configurar a chave GPG
-- Após `git-crypt unlock`, corrigir filtros no `.git/config` para usar PATH genérico (`"git-crypt" smudge/clean`) — o unlock registra caminhos absolutos que quebram quando o binário muda de lugar
 - Antes de `git-crypt add-gpg-user`, definir confiança GPG: `gpg --fingerprint --with-colons <KEY_ID> | awk -F: '/^fpr/{print $10":6:"}' | gpg --import-ownertrust`
 - `nix/user.nix.example` existe como template público — `user.nix` real nunca aparece em plaintext no repositório remoto
-
-## Gotchas do Nix
-
-- `nix search nixpkgs` busca no registry global (unstable), não na versão pinada do flake — usar `nix search github:NixOS/nixpkgs/nixpkgs-25.11-darwin <pacote>` ou [search.nixos.org](https://search.nixos.org/packages) com canal correto
-- Nomes com hífen (ex: `cryptomator-cli`) dentro de `with pkgs;` são interpretados como subtração — usar `pkgs."cryptomator-cli"` fora do `with`
-- `system.defaults` escalares duplicados entre módulos (ex: `commonConfiguration` e `kyoshiConfiguration`) causam conflito — usar `lib.mkDefault` no common se quiser permitir override por host
-- Versão 25.11 do home-manager renomeou: `programs.git.userName` → `settings.user.name`, `userEmail` → `settings.user.email`, `extraConfig` → `settings`
 
 ## Rebuild
 
