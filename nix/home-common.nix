@@ -142,6 +142,15 @@ in
     };
   };
 
+  programs.gpg = {
+    enable = true;
+  };
+
+  services.gpg-agent = {
+    enable = true;
+    pinentryPackage = pkgs.pinentry_mac;
+  };
+
   programs.starship = {
     enable = true;
     enableZshIntegration = true;
