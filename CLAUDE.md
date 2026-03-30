@@ -46,6 +46,13 @@ nix/
 - Antes de `git-crypt add-gpg-user`, definir confiança GPG: `gpg --fingerprint --with-colons <KEY_ID> | awk -F: '/^fpr/{print $10":6:"}' | gpg --import-ownertrust`
 - `nix/user.nix.example` existe como template público — `user.nix` real nunca aparece em plaintext no repositório remoto
 
+## GPG / Commit Signing
+
+- Pacote nixpkgs: `pinentry_mac` (underscore) — em `common.nix` junto ao `gnupg`
+- Agente configurado via `services.gpg-agent.pinentryPackage = pkgs.pinentry_mac` em `home-common.nix`
+- Após alterar configuração do gpg-agent: logout/login obrigatório (agente antigo continua rodando na sessão atual)
+- Sem pinentry configurado: `git commit` falha com `gpg: signing failed: No pinentry`
+
 ## Rebuild
 
 ```bash

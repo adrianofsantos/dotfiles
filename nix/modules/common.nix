@@ -14,6 +14,7 @@
     gcal
     git-crypt
     gnupg
+    pinentry_mac
     htop
     imagemagick
     ipcalc
