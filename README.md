@@ -62,25 +62,110 @@ hosts/kyoshi.nix      →  dock, casks e brews exclusivos da Kyoshi
 | Ferramenta de linha de comando no shell | `home-common.nix` → `home.packages` |
 | Ferramenta só na Kyoshi (ex: Docker) | `home-kyoshi.nix` → `home.packages` |
 
-## git-crypt — setup em máquina nova
+## Setup em máquina nova
 
-O arquivo `nix/user.nix` é commitado criptografado via git-crypt. Ao configurar uma máquina nova:
+### 1. Instalar o Nix
 
 ```bash
-# 1. Clonar o repositório normalmente
-git clone <repo> ~/repos/github/dotfiles
-
-# 2. Definir confiança máxima na sua chave GPG (necessário apenas uma vez por máquina)
-gpg --fingerprint --with-colons <KEY_ID> | awk -F: '/^fpr/{print $10":6:"}' | gpg --import-ownertrust
-
-# 3. Descriptografar os arquivos protegidos
-git-crypt unlock
-
-# 4. Verificar se user.nix está legível
-cat ~/repos/github/dotfiles/nix/user.nix
+curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
 ```
 
-> Se precisar adicionar uma nova chave GPG como autorizada:
+Abrir um terminal novo após a instalação.
+
+### 2. SSH key + clonar o repositório
+
+```bash
+ssh-keygen -t ed25519 -C "adriano.chico@gmail.com"
+eval "$(ssh-agent -s)" && ssh-add ~/.ssh/id_ed25519
+cat ~/.ssh/id_ed25519.pub | pbcopy
+# Adicionar em: GitHub → Settings → SSH Keys
+
+mkdir -p ~/repos/github && cd ~/repos/github
+git clone git@github.com:adrianofsantos/dotfiles.git
+```
+
+### 3. Importar chave GPG + descriptografar user.nix
+
+O `git-crypt` e `gnupg` são instalados pelo nix-darwin, mas o **primeiro build depende de `user.nix` decriptado** — um problema de chicken-and-egg. Instalar temporariamente via nix profile:
+
+```bash
+nix profile install nixpkgs#git-crypt nixpkgs#gnupg
+```
+
+Importar a chave GPG privada (transferir da outra máquina via AirDrop/USB):
+
+```bash
+# Na máquina de origem:
+gpg --export-secret-keys 16D7D0D901DE83FB > ~/gpg-private.key
+
+# Na máquina nova:
+gpg --import gpg-private.key && rm gpg-private.key
+
+# Definir confiança máxima (necessário para git-crypt)
+gpg --fingerprint --with-colons 16D7D0D901DE83FB | \
+  awk -F: '/^fpr/{print $10":6:"}' | gpg --import-ownertrust
+```
+
+Descriptografar:
+
+```bash
+cd ~/repos/github/dotfiles
+git-crypt unlock
+cat nix/user.nix  # deve mostrar conteúdo Nix legível
+```
+
+### 4. Primeiro build
+
+```bash
+cd ~/repos/github/dotfiles/nix
+sudo darwin-rebuild switch --flake .#HOSTNAME  # Aang ou Kyoshi
+```
+
+Primeiro build leva ~15-30 min.
+
+### 5. Configurar gpg-agent manualmente
+
+O `gpg-agent.conf` **não é gerenciado pelo home-manager** — precisa ser criado manualmente após o primeiro build:
+
+```bash
+mkdir -p ~/.gnupg
+cat > ~/.gnupg/gpg-agent.conf << 'EOF'
+pinentry-program /opt/homebrew/bin/pinentry-mac
+EOF
+chmod 600 ~/.gnupg/gpg-agent.conf
+```
+
+Fazer logout/login para que o agente GPG reinicie com a nova configuração. Sem esse passo, `git commit` falha com `gpg: signing failed: No pinentry`.
+
+### 6. Corrigir filtros do git-crypt
+
+O `git-crypt unlock` registra caminhos absolutos nos filtros do `.git/config`. Após o build, o binário muda de lugar (de `nix profile` para `nix-darwin`), quebrando os filtros. Corrigir para usar PATH genérico:
+
+```bash
+cd ~/repos/github/dotfiles
+git config filter.git-crypt.smudge '"git-crypt" smudge'
+git config filter.git-crypt.clean '"git-crypt" clean'
+git config filter.git-crypt.required true
+git config diff.git-crypt.textconv '"git-crypt" diff'
+```
+
+### 7. Pós-instalação
+
+```bash
+# Remover pacotes temporários (já estão no sistema via nix-darwin)
+nix profile remove nixpkgs#git-crypt nixpkgs#gnupg
+
+# Abrir terminal novo para carregar shell configs
+```
+
+Checklist:
+- [ ] `dr` funciona sem erros
+- [ ] `git log --show-signature -1` mostra assinatura GPG válida
+- [ ] Dock mostra os apps corretos
+- [ ] Proton apps iniciam automaticamente
+- [ ] Neovim abre com LazyVim (`v`)
+
+> Para adicionar nova chave GPG como autorizada ao git-crypt:
 > ```bash
 > git-crypt add-gpg-user <FINGERPRINT>
 > ```

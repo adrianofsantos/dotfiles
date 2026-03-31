@@ -57,6 +57,10 @@ nix/
 
 - Se um arquivo já existe no sistema e o home-manager tenta gerenciá-lo, o rebuild falha com `would be clobbered` — remover o arquivo manualmente antes de rodar `dr`
 
+## README — bootstrap
+
+- A seção "Setup em máquina nova" do README é o guia canônico de bootstrap — não remover nem enxugar; é a única documentação dos passos manuais pré-`dr`
+
 ## Rebuild
 
 ```bash
