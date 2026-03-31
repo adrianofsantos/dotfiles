@@ -15,7 +15,6 @@
       "steam"
       "tradingview"
       "veracrypt-fuse-t"
-      "visual-studio-code"
     ];
     brews = [
       "gemini-cli"

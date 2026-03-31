@@ -28,6 +28,7 @@
       "firefox"
       "obsidian"
       "openmtp"
+      "visual-studio-code"
       "raycast"
       "warp"
     ];
