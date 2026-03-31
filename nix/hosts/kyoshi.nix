@@ -6,7 +6,6 @@
       "android-studio"
       "balenaetcher"
       "calibre"
-      "discord"
       "docker-desktop"
       "obs"
       "ollama-app"

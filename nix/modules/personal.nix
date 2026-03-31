@@ -9,6 +9,7 @@
     casks = [
       "claude"
       "claude-code"
+      "discord"
       "fuse-t"
       "proton-drive"
       "proton-mail"
