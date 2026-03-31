@@ -21,9 +21,6 @@
       "gemini-cli"
       "irssi"
     ];
-    masApps = {
-      "HP Smart" = 1474276998;
-    };
     taps = [
     ];
   };
