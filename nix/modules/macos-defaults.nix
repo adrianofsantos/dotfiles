@@ -9,7 +9,7 @@
     screencapture.target = "file";
     screencapture.location = "~/Pictures/screenshots";
     screensaver.askForPasswordDelay = 10;
-    loginwindow.LoginwindowText = "\u201cSeja a mudança que você quer ver no mundo.\u201d \u2013 Mahatma Gandhi";
+    loginwindow.LoginwindowText = "Seja a mudança que você quer ver no mundo. Mahatma Gandhi";
     loginwindow.GuestEnabled = false;
     menuExtraClock.Show24Hour = true;
     menuExtraClock.ShowDate = 0;
