@@ -123,7 +123,21 @@ sudo darwin-rebuild switch --flake .#HOSTNAME  # Aang ou Kyoshi
 
 Primeiro build leva ~15-30 min.
 
-### 5. Corrigir filtros do git-crypt
+### 5. Configurar gpg-agent manualmente
+
+O `gpg-agent.conf` **não é gerenciado pelo home-manager** — precisa ser criado manualmente após o primeiro build:
+
+```bash
+mkdir -p ~/.gnupg
+cat > ~/.gnupg/gpg-agent.conf << 'EOF'
+pinentry-program /opt/homebrew/bin/pinentry-mac
+EOF
+chmod 600 ~/.gnupg/gpg-agent.conf
+```
+
+Fazer logout/login para que o agente GPG reinicie com a nova configuração. Sem esse passo, `git commit` falha com `gpg: signing failed: No pinentry`.
+
+### 6. Corrigir filtros do git-crypt
 
 O `git-crypt unlock` registra caminhos absolutos nos filtros do `.git/config`. Após o build, o binário muda de lugar (de `nix profile` para `nix-darwin`), quebrando os filtros. Corrigir para usar PATH genérico:
 
@@ -135,7 +149,7 @@ git config filter.git-crypt.required true
 git config diff.git-crypt.textconv '"git-crypt" diff'
 ```
 
-### 6. Pós-instalação
+### 7. Pós-instalação
 
 ```bash
 # Remover pacotes temporários (já estão no sistema via nix-darwin)

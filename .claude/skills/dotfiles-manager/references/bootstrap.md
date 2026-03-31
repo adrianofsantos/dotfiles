@@ -125,13 +125,35 @@ Após o build, `git-crypt` e `gnupg` já estão no sistema via nix-darwin. Remov
 nix profile remove nixpkgs#git-crypt nixpkgs#gnupg
 ```
 
-### 9. Abrir novo terminal
+### 9. Configurar gpg-agent
 
-Fechar e reabrir o terminal para que todas as configurações de shell (aliases, starship, zoxide, completions) sejam carregadas.
+Após o primeiro build, o `pinentry-mac` já estará instalado via brew. Configurar o agente GPG para usá-lo:
+
+```bash
+mkdir -p ~/.gnupg
+echo "pinentry-program /opt/homebrew/bin/pinentry-mac" > ~/.gnupg/gpg-agent.conf
+chmod 700 ~/.gnupg
+gpgconf --kill gpg-agent
+```
+
+### 10. Logout e login
+
+Fazer logout e login completo (não apenas fechar o terminal). Isso é necessário para:
+- Carregar as configurações de shell (aliases, starship, zoxide, completions)
+- Reiniciar o `gpg-agent` com a nova configuração de pinentry
+- Ativar Login Items do macOS (ProtonVPN, ProtonDrive)
+
+```
+Apple menu → Log Out → (confirmar) → Login
+```
+
+> **Atenção:** sem logout/login, o `gpg-agent` antigo (sem pinentry configurado) pode continuar rodando e commits assinados falharão com `gpg: signing failed: No pinentry`.
 
 ## Checklist pós-instalação
 
 - [ ] `dr` funciona (rebuild rápido sem erros)
+- [ ] `~/.gnupg/gpg-agent.conf` criado com `pinentry-program /opt/homebrew/bin/pinentry-mac`
+- [ ] Logout e login realizados (gpg-agent e Login Items precisam de nova sessão)
 - [ ] `git log --show-signature -1` mostra assinatura GPG válida
 - [ ] Dock mostra os apps corretos para o host
 - [ ] Proton apps iniciam automaticamente (via Login Items do macOS)
