@@ -17,7 +17,7 @@ nix/
 │   └── proton.nix         # NSAppSleepDisabled para ProtonVPN e ProtonDrive
 ├── hosts/
 │   ├── aang.nix           # Dock + casks exclusivos (chatgpt, google-chrome)
-│   └── kyoshi.nix         # Dock + casks + brews exclusivos (docker, steam, etc.)
+│   └── kyoshi.nix         # Dock + casks + brews exclusivos (docker, steam, homelab tools)
 ├── home-common.nix        # Base home-manager: shell, git, neovim, starship
 ├── home-aang.nix          # imports home-common (sem lazydocker, sem docker completions)
 └── home-kyoshi.nix        # imports home-common + lazydocker + docker completions
@@ -32,6 +32,10 @@ nix/
 - Dados pessoais (username, email, gpgKey, paths) estão centralizados em `user.nix` — único arquivo a editar ao fazer fork
 - `home-manager` usa `lib.mkAfter` para concatenar `initContent` de zsh entre módulos
 - ProtonVPN e ProtonDrive usam Login Items nativos do macOS — o `proton.nix` só desativa o App Nap, sem LaunchAgents (que causavam duplicação de processos)
+
+## Homebrew — Gotchas
+
+- `homebrew.onActivation.autoUpdate` **deve permanecer `false`** — definir como `true` permite que o `brew bundle` dispare um auto-update interno que corrompe a detecção do `mas`, causando `mas installation failed` mesmo com o app já instalado. Com `autoUpdate = false`, o nix-darwin passa `HOMEBREW_NO_AUTO_UPDATE=1` ao chamar `brew bundle`
 
 ## Decisões arquiteturais
 
@@ -53,6 +57,11 @@ nix/
 - Sem pinentry: `git commit` falha com `gpg: signing failed: No pinentry`
 - Após alterar gpg-agent: logout/login obrigatório (agente antigo continua na sessão)
 
+## Nix — Gotchas
+
+- `nix search nixpkgs` busca no registry global (geralmente unstable), não na versão pinada do flake. Usar: `nix search github:NixOS/nixpkgs/nixpkgs-25.11-darwin <pacote>`
+- `with pkgs;` trata hífens como subtração — pacotes com hífen falham silenciosamente. Usar `pkgs."nome-com-hífen"` dentro de um bloco `with pkgs;`, ou referenciar sem `with`
+
 ## home-manager — Gotchas
 
 - Se um arquivo já existe no sistema e o home-manager tenta gerenciá-lo, o rebuild falha com `would be clobbered` — remover o arquivo manualmente antes de rodar `dr`
@@ -65,4 +74,7 @@ nix/
 
 ```bash
 dr   # alias para: sudo darwin-rebuild switch --flake ~/repos/github/dotfiles/nix/
+
+# Atualizar dependências do flake (pinagem de versões)
+nix flake update --flake ~/repos/github/dotfiles/nix/
 ```

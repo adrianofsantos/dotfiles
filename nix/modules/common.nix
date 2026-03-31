@@ -28,6 +28,7 @@
       "firefox"
       "obsidian"
       "openmtp"
+      "visual-studio-code"
       "raycast"
       "warp"
     ];
@@ -40,7 +41,7 @@
     ];
     onActivation = {
       cleanup = "zap";
-      autoUpdate = true;
+      autoUpdate = false;
       upgrade = true;
     };
   };

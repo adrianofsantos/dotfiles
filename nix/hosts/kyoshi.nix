@@ -6,7 +6,6 @@
       "android-studio"
       "balenaetcher"
       "calibre"
-      "discord"
       "docker-desktop"
       "obs"
       "ollama-app"
@@ -16,14 +15,16 @@
       "steam"
       "tradingview"
       "veracrypt-fuse-t"
-      "visual-studio-code"
     ];
     brews = [
       "gemini-cli"
       "irssi"
+      "opentofu"
+      "talhelper"
+      "xcodegen"
     ];
     masApps = {
-      "HP Smart" = 1474276998;
+      "Xcode" = 497799835;
     };
     taps = [
     ];
