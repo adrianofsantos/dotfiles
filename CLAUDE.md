@@ -18,7 +18,7 @@ nix/
 ├── hosts/
 │   ├── aang.nix           # Dock + casks exclusivos (chatgpt, google-chrome)
 │   └── kyoshi.nix         # Dock + casks + brews exclusivos (docker, steam, homelab tools)
-├── home-common.nix        # Base home-manager: shell, git, neovim, starship
+├── home-common.nix        # Base home-manager: shell, git, neovim, starship, claude configs
 ├── home-aang.nix          # imports home-common (sem lazydocker, sem docker completions)
 └── home-kyoshi.nix        # imports home-common + lazydocker + docker completions
 ```
@@ -36,6 +36,7 @@ nix/
 ## Homebrew — Gotchas
 
 - `homebrew.onActivation.autoUpdate` **deve permanecer `false`** — definir como `true` permite que o `brew bundle` dispare um auto-update interno que corrompe a detecção do `mas`, causando `mas installation failed` mesmo com o app já instalado. Com `autoUpdate = false`, o nix-darwin passa `HOMEBREW_NO_AUTO_UPDATE=1` ao chamar `brew bundle`
+- `homebrew.onActivation.cleanup = "zap"` remove **qualquer** pacote brew não declarado em nenhum módulo no próximo `dr` — se instalar algo manualmente com `brew install`, declarar no módulo correspondente ou será desinstalado
 
 ## Decisões arquiteturais
 
@@ -43,6 +44,13 @@ nix/
 - **Kyoshi tem Docker Desktop**: não Podman. Docker Desktop expõe o socket padrão que os MCP servers esperam
 - **home-common.nix** contém toda a config compartilhada — hosts só declaram divergências
 - **fuse-t** permanece no `personal.nix` pois o Cryptomator depende dele para montar volumes no macOS
+
+## Claude Code
+
+- `claude/CLAUDE.md`, `claude/settings.json` e `claude/statusline-command.sh` são gerenciados pelo `home-common.nix` via `mkOutOfStoreSymlink` — alterações nos arquivos fonte têm efeito imediato sem `dr`
+- `claude/CLAUDE.md` é o global CLAUDE.md (`~/.claude/CLAUDE.md`) — contém o workflow Pesquisa→Spec→Code e vale para todos os projetos
+- `claude/settings.json` e `claude/statusline-command.sh` são públicos no repositório — não incluir tokens, chaves ou dados pessoais nesses arquivos
+- Após bootstrap: rodar `claude` para autenticar via browser antes de usar
 
 ## Segurança
 

@@ -171,6 +171,9 @@ in
     source = config.lib.file.mkOutOfStoreSymlink "${user.dotfilesDir}/nvim";
   };
 
+  home.file.".claude/CLAUDE.md" = {
+    source = config.lib.file.mkOutOfStoreSymlink "${user.dotfilesDir}/claude/CLAUDE.md";
+  };
   home.file.".claude/statusline-command.sh" = {
     source = config.lib.file.mkOutOfStoreSymlink "${user.dotfilesDir}/claude/statusline-command.sh";
   };
