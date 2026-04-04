@@ -158,12 +158,28 @@ nix profile remove nixpkgs#git-crypt nixpkgs#gnupg
 # Abrir terminal novo para carregar shell configs
 ```
 
+### 8. Configurar Claude Code
+
+O `claude` CLI é instalado via Homebrew cask (`personal.nix`). Após o primeiro `dr`:
+
+```bash
+# Autenticar com a conta Anthropic
+claude
+# Seguir o fluxo de login no browser
+```
+
+O `home-manager` já cria os symlinks para:
+- `~/.claude/CLAUDE.md` → instruções globais e workflow Pesquisa→Spec→Code
+- `~/.claude/settings.json` → tema, modelo, statusline
+- `~/.claude/statusline-command.sh` → script do status line customizado
+
 Checklist:
 - [ ] `dr` funciona sem erros
 - [ ] `git log --show-signature -1` mostra assinatura GPG válida
 - [ ] Dock mostra os apps corretos
 - [ ] Proton apps iniciam automaticamente
 - [ ] Neovim abre com LazyVim (`v`)
+- [ ] `claude` abre autenticado com statusline customizado
 
 > Para adicionar nova chave GPG como autorizada ao git-crypt:
 > ```bash

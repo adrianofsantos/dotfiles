@@ -18,7 +18,7 @@ nix/
 ├── hosts/
 │   ├── aang.nix           # Dock + casks exclusivos (chatgpt, google-chrome)
 │   └── kyoshi.nix         # Dock + casks + brews exclusivos (docker, steam, homelab tools)
-├── home-common.nix        # Base home-manager: shell, git, neovim, starship
+├── home-common.nix        # Base home-manager: shell, git, neovim, starship, claude configs
 ├── home-aang.nix          # imports home-common (sem lazydocker, sem docker completions)
 └── home-kyoshi.nix        # imports home-common + lazydocker + docker completions
 ```
@@ -43,6 +43,13 @@ nix/
 - **Kyoshi tem Docker Desktop**: não Podman. Docker Desktop expõe o socket padrão que os MCP servers esperam
 - **home-common.nix** contém toda a config compartilhada — hosts só declaram divergências
 - **fuse-t** permanece no `personal.nix` pois o Cryptomator depende dele para montar volumes no macOS
+
+## Claude Code
+
+- `claude/CLAUDE.md`, `claude/settings.json` e `claude/statusline-command.sh` são gerenciados pelo `home-common.nix` via `mkOutOfStoreSymlink` — alterações nos arquivos fonte têm efeito imediato sem `dr`
+- `claude/CLAUDE.md` é o global CLAUDE.md (`~/.claude/CLAUDE.md`) — contém o workflow Pesquisa→Spec→Code e vale para todos os projetos
+- `claude/settings.json` e `claude/statusline-command.sh` são públicos no repositório — não incluir tokens, chaves ou dados pessoais nesses arquivos
+- Após bootstrap: rodar `claude` para autenticar via browser antes de usar
 
 ## Segurança
 
