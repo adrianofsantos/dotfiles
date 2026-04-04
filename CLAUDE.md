@@ -36,6 +36,7 @@ nix/
 ## Homebrew — Gotchas
 
 - `homebrew.onActivation.autoUpdate` **deve permanecer `false`** — definir como `true` permite que o `brew bundle` dispare um auto-update interno que corrompe a detecção do `mas`, causando `mas installation failed` mesmo com o app já instalado. Com `autoUpdate = false`, o nix-darwin passa `HOMEBREW_NO_AUTO_UPDATE=1` ao chamar `brew bundle`
+- `homebrew.onActivation.cleanup = "zap"` remove **qualquer** pacote brew não declarado em nenhum módulo no próximo `dr` — se instalar algo manualmente com `brew install`, declarar no módulo correspondente ou será desinstalado
 
 ## Decisões arquiteturais
 
