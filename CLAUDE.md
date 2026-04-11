@@ -13,8 +13,7 @@ nix/
 │   ├── personal.nix       # Proton suite, Claude, fuse-t, talosctl
 │   ├── macos-defaults.nix # system.defaults + Touch ID sudo
 │   ├── nix-settings.nix   # GC automático (7d), optimise, flakes
-│   ├── rosetta.nix        # nix-homebrew com Rosetta 2
-│   └── proton.nix         # NSAppSleepDisabled para ProtonVPN e ProtonDrive
+│   └── rosetta.nix        # nix-homebrew com Rosetta 2
 ├── hosts/
 │   ├── aang.nix           # Dock + casks exclusivos (chatgpt, google-chrome)
 │   └── kyoshi.nix         # Dock + casks + brews exclusivos (docker, steam, homelab tools)
@@ -31,7 +30,7 @@ nix/
 - `extraSpecialArgs = { inherit user; }` passa os mesmos dados aos módulos do home-manager
 - Dados pessoais (username, email, gpgKey, paths) estão centralizados em `user.nix` — único arquivo a editar ao fazer fork
 - `home-manager` usa `lib.mkAfter` para concatenar `initContent` de zsh entre módulos
-- ProtonVPN e ProtonDrive usam Login Items nativos do macOS — o `proton.nix` só desativa o App Nap, sem LaunchAgents (que causavam duplicação de processos)
+- ProtonVPN e ProtonDrive usam Login Items nativos do macOS — sem LaunchAgents ou módulos adicionais. `NSAppSleepDisabled` via activation script **não** resolve ícones duplicados no Aang e foi removido.
 
 ## Homebrew — Gotchas
 
