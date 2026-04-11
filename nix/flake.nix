@@ -25,7 +25,6 @@
         ./modules/personal.nix
         ./modules/macos-defaults.nix
         ./modules/nix-settings.nix
-        ./modules/proton.nix
         ./hosts/aang.nix
         nix-homebrew.darwinModules.nix-homebrew
         ./modules/rosetta.nix
