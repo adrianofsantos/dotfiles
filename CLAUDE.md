@@ -82,6 +82,8 @@ nix/
 - `nvim/` usa `mkOutOfStoreSymlink` mas a cadeia passa pelo Nix store: `~/.config/nvim` → store intermediário → `~/repos/github/dotfiles/nvim`. Alterações em `nvim/` requerem `dr` para efeito (diferente dos arquivos `claude/` que são symlinks diretos)
 - LazyVim com `install_version >= 8` (ver `~/.config/nvim/lazyvim.json`): picker padrão é **snacks.nvim**, não telescope. Explorer padrão é **snacks explorer**, não neo-tree. Configurar via `opts.picker.sources.files` e `opts.picker.sources.explorer`
 - No snacks picker, a opção para arquivos gitignored é `ignored = true` (não `no_ignore`); para dotfiles é `hidden = true`
+- Plugins custom estão em `nvim/lua/plugins/`: `catppuccin.lua` (tema), `editor.lua` (snacks picker overrides), `obsidian.lua` (vault Cryptomator). `example.lua` é o template upstream do LazyVim — manter sincronizado com https://github.com/LazyVim/starter
+- `obsidian.nvim` não precisa de `telescope.nvim` como dependência no LazyVim v8+ (snacks picker é o padrão)
 
 ## Rebuild
 
