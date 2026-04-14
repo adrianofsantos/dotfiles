@@ -16,19 +16,13 @@ return {
     "nvim-lua/plenary.nvim",
 
     -- see below for full list of optional dependencies https://github.com/epwalsh/obsidian.nvim?tab=readme-ov-file#plugin-dependencies
-    "nvim-telescope/telescope.nvim",
     "hrsh7th/nvim-cmp",
-    "pomo.nvim",
   },
   opts = {
     workspaces = {
       {
         name = "personal",
-        path = "/Users/adrianofsantos/repos/github/Notes/Vaults/MyLife/",
-      },
-      {
-        name = "amer3",
-        path = "/Users/adrianofsantos/repos/github/Notes/Vaults/americanas sa/",
+        path = "/Users/adrianofsantos/Library/Application Support/Cryptomator/mnt/MyLife",
       },
     },
 
