@@ -49,40 +49,50 @@ Para tarefas **grandes**, separe em `PRD.md` (o quê/por quê) e `Spec.md`
 (como/onde).
 
 ### Conteúdo mínimo do plan.md
+
 ```markdown
 # Plan: [Nome]
 
 ## Contexto
+
 [O que existe e por que precisa mudar]
 
 ## Fora do escopo
+
 [O que deliberadamente não será feito]
 
 ## Arquivos a criar
+
 | Arquivo | Propósito |
-|---------|-----------|
-| `path` | descrição |
+| ------- | --------- |
+| `path`  | descrição |
 
 ## Arquivos a modificar
+
 | Arquivo | O que muda |
-|---------|------------|
-| `path` | descrição |
+| ------- | ---------- |
+| `path`  | descrição  |
 
 ## Interfaces / Contratos
+
 [Assinaturas, schemas, tipos — se aplicável]
 
 ## Lógica principal
+
 [Pseudocódigo ou descrição do fluxo]
 
 ## Testes
+
 - [ ] Teste 1
 - [ ] Teste 2
 
 ## Edge cases
+
 - [caso]: [tratamento]
 ```
 
 **Gate**: apresente o plano ao usuário e aguarde aprovação.
+
 - Se identificar problemas na abordagem solicitada (overengineering,
   solução frágil, padrão inconsistente com o projeto), diga antes de
   apresentar o plano — não depois, e não escondido em ressalvas suaves.
@@ -102,10 +112,12 @@ Para tarefas **grandes**, separe em `PRD.md` (o quê/por quê) e `Spec.md`
    errado só porque foi aprovado.
 
 ### Se precisar abortar
+
 - Reverta arquivos modificados ou documente o estado parcial
 - Informe o que foi feito e o que ficou pendente
 
 ### Ao finalizar
+
 - Confirme que o comportamento bate com o plano
 - Sugira atualizações ao `CLAUDE.md` se houver decisões novas
 
@@ -113,11 +125,11 @@ Para tarefas **grandes**, separe em `PRD.md` (o quê/por quê) e `Spec.md`
 
 ## Adaptação por tamanho
 
-| Tamanho | Pesquisa | Plano | Code |
-|---------|----------|-------|------|
-| Micro (1 arquivo, mudança óbvia) | Leitura rápida | Inline no chat | Direto |
-| Médio (2-5 arquivos) | Arquivos afetados | `plan.md` único | Por arquivo |
-| Grande (6+ arquivos / novo módulo) | Codebase ampla | PRD.md + Spec.md separados | Por módulo com checkpoints |
+| Tamanho                            | Pesquisa          | Plano                      | Code                       |
+| ---------------------------------- | ----------------- | -------------------------- | -------------------------- |
+| Micro (1 arquivo, mudança óbvia)   | Leitura rápida    | Inline no chat             | Direto                     |
+| Médio (2-5 arquivos)               | Arquivos afetados | `plan.md` único            | Por arquivo                |
+| Grande (6+ arquivos / novo módulo) | Codebase ampla    | PRD.md + Spec.md separados | Por módulo com checkpoints |
 
 ---
 
@@ -127,3 +139,9 @@ Para tarefas **grandes**, separe em `PRD.md` (o quê/por quê) e `Spec.md`
 - Implementação crescendo além do escopo
 - Incerteza sobre como módulo existente funciona
 - Contexto da conversa muito longo — resuma progresso antes de continuar
+
+---
+
+## Escrita de textos
+
+Evite travessões (—) em todas as respostas. Use vírgulas, dois-pontos ou reescreva a frase quando necessário.
