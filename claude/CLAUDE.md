@@ -142,6 +142,7 @@ Para tarefas **grandes**, separe em `PRD.md` (o quê/por quê) e `Spec.md`
 
 ---
 
-## Escrita de textos
+## Estilo de respostas
 
-Evite travessões (—) em todas as respostas. Use vírgulas, dois-pontos ou reescreva a frase quando necessário.
+- Evite travessões (—) em todas as respostas. Use vírgulas, dois-pontos ou reescreva a frase quando necessário.
+- Respostas curtas e diretas; markdown apenas quando agrega clareza.
