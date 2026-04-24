@@ -92,6 +92,8 @@ in
 
       # Nix
       dr = "sudo darwin-rebuild switch --flake ~/repos/github/dotfiles/nix/";
+      dr-check = "nix flake check ~/repos/github/dotfiles/nix/";
+      dr-build = "sudo darwin-rebuild build --flake ~/repos/github/dotfiles/nix/";
 
       # Navegação
       ".." = "cd ..";
@@ -148,6 +150,7 @@ in
   };
   xdg.configFile."starship.toml" = {
     source = config.lib.file.mkOutOfStoreSymlink "${user.dotfilesDir}/starship.toml";
+    force = true;
   };
 
   programs.bat = {
@@ -157,27 +160,34 @@ in
   };
   xdg.configFile."bat/themes" = {
     source = config.lib.file.mkOutOfStoreSymlink "${user.dotfilesDir}/bat/themes";
+    force = true;
   };
 
   xdg.configFile."bpytop" = {
     source = config.lib.file.mkOutOfStoreSymlink "${user.dotfilesDir}/bpytop";
+    force = true;
   };
 
   xdg.configFile."raycast" = {
     source = config.lib.file.mkOutOfStoreSymlink "${user.dotfilesDir}/raycast";
+    force = true;
   };
 
   xdg.configFile."nvim" = {
     source = config.lib.file.mkOutOfStoreSymlink "${user.dotfilesDir}/nvim";
+    force = true;
   };
 
   home.file.".claude/CLAUDE.md" = {
     source = config.lib.file.mkOutOfStoreSymlink "${user.dotfilesDir}/claude/CLAUDE.md";
+    force = true;
   };
   home.file.".claude/statusline-command.sh" = {
     source = config.lib.file.mkOutOfStoreSymlink "${user.dotfilesDir}/claude/statusline-command.sh";
+    force = true;
   };
   home.file.".claude/settings.json" = {
     source = config.lib.file.mkOutOfStoreSymlink "${user.dotfilesDir}/claude/settings.json";
+    force = true;
   };
 }
