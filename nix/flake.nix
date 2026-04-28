@@ -15,6 +15,7 @@
   outputs = inputs@{ self, nix-darwin, nixpkgs, nix-homebrew, home-manager }:
   let
     user = import ./user.nix;
+    hmBackupCommand = ''f="$1"; mv "$f" "$f.bak" && echo "[home-manager] backup criado: $f → $f.bak"'';
   in
   {
     # $ darwin-rebuild switch --flake .#Aang
@@ -33,6 +34,7 @@
           home-manager = {
             useGlobalPkgs = true;
             useUserPackages = true;
+            backupCommand = hmBackupCommand;
             extraSpecialArgs = { inherit user; };
             users.${user.username} = import ./home-aang.nix;
           };
@@ -56,6 +58,7 @@
           home-manager = {
             useGlobalPkgs = true;
             useUserPackages = true;
+            backupCommand = hmBackupCommand;
             extraSpecialArgs = { inherit user; };
             users.${user.username} = import ./home-kyoshi.nix;
           };

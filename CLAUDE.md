@@ -7,7 +7,7 @@ Dois hosts Apple Silicon: **Aang** (MacBook Air, uso secundário) e **Kyoshi** (
 
 ```
 nix/
-├── flake.nix              # Apenas inputs e composição dos hosts
+├── flake.nix              # inputs, composição dos hosts e variáveis compartilhadas (bloco let)
 ├── modules/
 │   ├── common.nix         # Base: usuário, pacotes, Homebrew, stateVersion
 │   ├── personal.nix       # Proton suite, Claude, fuse-t, talosctl
@@ -25,6 +25,7 @@ nix/
 ## Convenções
 
 - Listas Homebrew (`casks`, `brews`) são **mergeadas automaticamente** pelo módulo system — cada módulo só declara o seu incremento, sem repetir o que já está no common
+- Valores compartilhados entre os dois hosts em `flake.nix` são extraídos para o bloco `let` como variáveis nomeadas (ex: `hmBackupCommand`)
 - `nixpkgs.hostPlatform = "aarch64-darwin"` está em `common.nix` — vale para ambos os hosts
 - `specialArgs = { inherit self user; }` passa `self.rev` e dados do usuário aos módulos do sistema
 - `extraSpecialArgs = { inherit user; }` passa os mesmos dados aos módulos do home-manager
@@ -69,9 +70,16 @@ nix/
 - `nix search nixpkgs` busca no registry global (geralmente unstable), não na versão pinada do flake. Usar: `nix search github:NixOS/nixpkgs/nixpkgs-25.11-darwin <pacote>`
 - `with pkgs;` trata hífens como subtração — pacotes com hífen falham silenciosamente. Usar `pkgs."nome-com-hífen"` dentro de um bloco `with pkgs;`, ou referenciar sem `with`
 
+## home-manager — Convenções
+
+- Todo `home.file` ou `xdg.configFile` deve declarar `force` explicitamente, mesmo que seja o valor default (`false`). Valores que diferem do default devem ser declarados sem exceção.
+- Arquivos gerenciados via `mkOutOfStoreSymlink` apontando para o repositório git usam `force = true`: a fonte de verdade está no git, não há nada a preservar no arquivo avulso.
+- `backupCommand` está configurado globalmente no `flake.nix` para ambos os hosts: arquivos com `force = false` que colidiriam são renomeados para `.bak` e uma linha é impressa no terminal durante o `dr`. Arquivos com `force = true` sobrescrevem diretamente sem backup.
+
 ## home-manager — Gotchas
 
-- Se um arquivo já existe no sistema e o home-manager tenta gerenciá-lo, o rebuild falha com `would be clobbered` — remover o arquivo manualmente antes de rodar `dr`
+- Se um arquivo já existe no sistema e o home-manager tenta gerenciá-lo sem `force = true` e sem `backupCommand` configurado, o rebuild falha com `would be clobbered`
+- Arquivos `.bak` gerados pelo `backupCommand` podem ser removidos com segurança após confirmar que o `dr` criou o symlink corretamente
 
 ## README — bootstrap
 
@@ -88,8 +96,14 @@ nix/
 ## Rebuild
 
 ```bash
-dr   # alias para: sudo darwin-rebuild switch --flake ~/repos/github/dotfiles/nix/
+dr         # alias para: sudo darwin-rebuild switch --flake ~/repos/github/dotfiles/nix/
+dr-check   # alias para: nix flake check ~/repos/github/dotfiles/nix/
+dr-build   # alias para: sudo darwin-rebuild build --flake ~/repos/github/dotfiles/nix/
 
 # Atualizar dependências do flake (pinagem de versões)
 nix flake update --flake ~/repos/github/dotfiles/nix/
 ```
+
+## Workflow de alterações
+
+Após qualquer modificação em arquivos `.nix`, executar `nix flake check ~/repos/github/dotfiles/nix/` antes de reportar a tarefa como concluída. Se o check falhar, corrigir antes de continuar.
