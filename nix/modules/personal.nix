@@ -23,7 +23,6 @@
       "talosctl"
     ];
     masApps = {
-      "Perplexity ask anything" = 6714467650;
       "HP Smart" = 1474276998;
     };
   };
