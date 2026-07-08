@@ -1,7 +1,7 @@
 { ... }:
 
 {
-  homebrew{
+  homebrew = {
     casks = [
     ];
     brews = [

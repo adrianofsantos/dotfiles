@@ -18,5 +18,6 @@
         "repo": "warpdotdev/claude-code-warp"
       }
     }
-  }
+  },
+  "tui": "fullscreen"
 }
