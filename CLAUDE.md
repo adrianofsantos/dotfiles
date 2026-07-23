@@ -32,6 +32,7 @@ nix/
 - Dados pessoais (username, email, gpgKey, paths) estão centralizados em `user.nix` — único arquivo a editar ao fazer fork
 - `home-manager` usa `lib.mkAfter` para concatenar `initContent` de zsh entre módulos
 - ProtonVPN e ProtonDrive usam Login Items nativos do macOS — sem LaunchAgents ou módulos adicionais. `NSAppSleepDisabled` via activation script **não** resolve ícones duplicados no Aang e foi removido.
+- Causa raiz da duplicação de processos do Proton (VPN e Drive) após login: o antigo `proton.nix` (removido em `51d95fc`) gravava `~/Library/LaunchAgents/ch.protonvpn.mac.plist` e `~/Library/LaunchAgents/me.proton.drive.plist` diretamente no disco. Remover o módulo do Nix não desfaz esses arquivos — eles continuam carregados pelo `launchd` e disputam com o Login Item nativo do macOS, gerando duas instâncias do mesmo app. Se voltar a acontecer em qualquer máquina, verificar `ls ~/Library/LaunchAgents/ | grep -i proton`; se existir, `launchctl bootout gui/$(id -u)/<label>` e remover o plist.
 
 ## Homebrew — Gotchas
 
