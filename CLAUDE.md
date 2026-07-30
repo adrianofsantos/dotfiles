@@ -39,6 +39,7 @@ nix/
 - `homebrew.onActivation.cleanup = "zap"` remove **qualquer** pacote brew não declarado em nenhum módulo no próximo `dr` — se instalar algo manualmente com `brew install`, declarar no módulo correspondente ou será desinstalado
 - `brew cleanup` pode falhar com `Error: No such file or directory @ dir_s_rmdir` durante o `brew bundle` do `dr` — race condition cosmética no cache do Homebrew, não indica falha do upgrade (que já terminou antes do cleanup rodar). Seguro ignorar
 - `dr` upgrading ~20 casks/masApps costuma passar dos 5 min default do `sudo` `timestamp_timeout`, causando pedidos repetidos de senha (às vezes com Touch ID falhando e caindo para senha manual). Corrigido via `security.sudo.extraConfig` (`timestamp_timeout=15`) em `macos-defaults.nix`
+- Pacote muito recente para estar no nixpkgs pinado (`nix search github:NixOS/nixpkgs/nixpkgs-25.11-darwin <pacote>` não retorna nada): preferir Homebrew formula em `brews` a manter um flake input de terceiro — evita overhead de pin próprio sem necessidade real
 
 ## Decisões arquiteturais
 
@@ -49,14 +50,18 @@ nix/
 
 ## Claude Code
 
-- `claude/CLAUDE.md`, `claude/settings.json` e `claude/statusline-command.sh` são gerenciados pelo `home-common.nix` via `mkOutOfStoreSymlink` — alterações nos arquivos fonte têm efeito imediato sem `dr`
-- `claude/CLAUDE.md` é o global CLAUDE.md (`~/.claude/CLAUDE.md`) — contém o workflow Pesquisa→Spec→Code e vale para todos os projetos
+- `claude/CLAUDE.md`, `claude/skills/`, `claude/settings.json` e `claude/statusline-command.sh` são gerenciados pelo `home-common.nix` via `mkOutOfStoreSymlink` — alterações nos arquivos fonte têm efeito imediato sem `dr`
+- `claude/CLAUDE.md` é o global CLAUDE.md (`~/.claude/CLAUDE.md`) — preferências verdadeiramente globais (persona, idioma, comunicação, git, safety rules), carregado sempre em toda conversa/projeto. Editado com frequência direto pelo usuário fora de PR — conferir o arquivo em vez de assumir conteúdo específico
+- `claude/skills/prd-spec-code-workflow/SKILL.md` é o workflow Pesquisa→Spec→Code (`~/.claude/skills/prd-spec-code-workflow/SKILL.md`) — carrega sob demanda quando o pedido do usuário bate com a `description` da skill (novo módulo, PRD/spec, mudança de contrato), não em toda conversa. Extraído do CLAUDE.md global para economizar tokens em tarefas triviais; trade-off: ativação depende de matching semântico, não é garantida
+- Nova skill pessoal: arquivo em `claude/skills/<nome>/SKILL.md` + `home.file` correspondente em `home-common.nix` (mesmo padrão `mkOutOfStoreSymlink` + `force = true` do `claude/CLAUDE.md`)
 - `claude/settings.json` e `claude/statusline-command.sh` são públicos no repositório — não incluir tokens, chaves ou dados pessoais nesses arquivos
 - Após bootstrap: rodar `claude` para autenticar via browser antes de usar
 - Plugins em `~/.claude/plugins/installed_plugins.json` com `"scope": "project"` presos a um `projectPath` que não bate com o diretório atual não carregam, mesmo com `enabledPlugins: true` no `settings.json`. Corrigir via `/plugin` (reinstalar como `user` scope, igual ao plugin `warp`) e rodar `/reload-plugins` para aplicar
 
 ## Segurança
 
+- Hook de pre-commit (gitleaks, bloqueia commits com secrets) é declarativo via `programs.git.hooks.pre-commit` em `home-common.nix`, apontando pra `nix/git-hooks/pre-commit`. Aplicado globalmente (`core.hooksPath` em `~/.config/git/config`, vale pra todo repo na máquina) no próximo `dr` — sem passo manual de bootstrap
+- Diferente de `claude/CLAUDE.md`/`nvim/` (symlink direto ou via `mkOutOfStoreSymlink`), `programs.git.hooks` copia o arquivo pro Nix store na avaliação — editar `nix/git-hooks/pre-commit` exige `dr` pra ter efeito, não é instantâneo
 - `nix/user.nix` está criptografado com git-crypt — ao clonar em máquina nova rodar `git-crypt unlock` após configurar a chave GPG
 - Antes de `git-crypt add-gpg-user`, definir confiança GPG: `gpg --fingerprint --with-colons <KEY_ID> | awk -F: '/^fpr/{print $10":6:"}' | gpg --import-ownertrust`
 - `nix/user.nix.example` existe como template público — `user.nix` real nunca aparece em plaintext no repositório remoto
