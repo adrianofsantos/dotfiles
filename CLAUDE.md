@@ -37,6 +37,8 @@ nix/
 
 - `homebrew.onActivation.autoUpdate` **deve permanecer `false`** — definir como `true` permite que o `brew bundle` dispare um auto-update interno que corrompe a detecção do `mas`, causando `mas installation failed` mesmo com o app já instalado. Com `autoUpdate = false`, o nix-darwin passa `HOMEBREW_NO_AUTO_UPDATE=1` ao chamar `brew bundle`
 - `homebrew.onActivation.cleanup = "zap"` remove **qualquer** pacote brew não declarado em nenhum módulo no próximo `dr` — se instalar algo manualmente com `brew install`, declarar no módulo correspondente ou será desinstalado
+- `brew cleanup` pode falhar com `Error: No such file or directory @ dir_s_rmdir` durante o `brew bundle` do `dr` — race condition cosmética no cache do Homebrew, não indica falha do upgrade (que já terminou antes do cleanup rodar). Seguro ignorar
+- `dr` upgrading ~20 casks/masApps costuma passar dos 5 min default do `sudo` `timestamp_timeout`, causando pedidos repetidos de senha (às vezes com Touch ID falhando e caindo para senha manual). Corrigido via `security.sudo.extraConfig` (`timestamp_timeout=15`) em `macos-defaults.nix`
 
 ## Decisões arquiteturais
 
@@ -51,6 +53,7 @@ nix/
 - `claude/CLAUDE.md` é o global CLAUDE.md (`~/.claude/CLAUDE.md`) — contém o workflow Pesquisa→Spec→Code e vale para todos os projetos
 - `claude/settings.json` e `claude/statusline-command.sh` são públicos no repositório — não incluir tokens, chaves ou dados pessoais nesses arquivos
 - Após bootstrap: rodar `claude` para autenticar via browser antes de usar
+- Plugins em `~/.claude/plugins/installed_plugins.json` com `"scope": "project"` presos a um `projectPath` que não bate com o diretório atual não carregam, mesmo com `enabledPlugins: true` no `settings.json`. Corrigir via `/plugin` (reinstalar como `user` scope, igual ao plugin `warp`) e rodar `/reload-plugins` para aplicar
 
 ## Segurança
 
@@ -65,10 +68,15 @@ nix/
 - Sem pinentry: `git commit` falha com `gpg: signing failed: No pinentry`
 - Após alterar gpg-agent: logout/login obrigatório (agente antigo continua na sessão)
 
+## Git / SSH
+
+- Após logout/reboot, o `ssh-agent` perde as identidades carregadas (`ssh-add -l` → "The agent has no identities"), bloqueando `git push`/`gh` sobre SSH até rodar `ssh-add ~/.ssh/id_ed25519` (pede a passphrase)
+
 ## Nix — Gotchas
 
 - `nix search nixpkgs` busca no registry global (geralmente unstable), não na versão pinada do flake. Usar: `nix search github:NixOS/nixpkgs/nixpkgs-25.11-darwin <pacote>`
 - `with pkgs;` trata hífens como subtração — pacotes com hífen falham silenciosamente. Usar `pkgs."nome-com-hífen"` dentro de um bloco `with pkgs;`, ou referenciar sem `with`
+- Para checar o default real de uma opção nix-darwin antes de alterá-la: `nix eval ~/repos/github/dotfiles/nix#darwinConfigurations.<Host>.options.<caminho>.default`. Para opções `extraConfig` (texto bruto, ex: `security.sudo.extraConfig`), esse default é sempre `null` — o comportamento real vem da ferramenta subjacente (ex: `man 5 sudoers` para `timestamp_timeout`, 5 min por default)
 
 ## home-manager — Convenções
 
