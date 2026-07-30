@@ -35,6 +35,7 @@
     brews = [
       "bpytop"
       "gh"
+      "herdr"
       "pinentry-mac"
       "watch"
       "mas"
