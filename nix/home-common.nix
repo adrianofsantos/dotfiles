@@ -142,6 +142,9 @@ in
       push.autoSetupRemote = true;
       core.editor = "nvim";
     };
+    hooks = {
+      pre-commit = ./git-hooks/pre-commit;
+    };
   };
 
   programs.starship = {
@@ -180,6 +183,10 @@ in
 
   home.file.".claude/CLAUDE.md" = {
     source = config.lib.file.mkOutOfStoreSymlink "${user.dotfilesDir}/claude/CLAUDE.md";
+    force = true;
+  };
+  home.file.".claude/skills/prd-spec-code-workflow/SKILL.md" = {
+    source = config.lib.file.mkOutOfStoreSymlink "${user.dotfilesDir}/claude/skills/prd-spec-code-workflow/SKILL.md";
     force = true;
   };
   home.file.".claude/statusline-command.sh" = {
