@@ -50,7 +50,7 @@ nix/
 
 ## Claude Code
 
-- `claude/CLAUDE.md`, `claude/skills/`, `claude/settings.json` e `claude/statusline-command.sh` são gerenciados pelo `home-common.nix` via `mkOutOfStoreSymlink` — alterações nos arquivos fonte têm efeito imediato sem `dr`
+- `claude/CLAUDE.md`, cada skill em `claude/skills/<nome>/SKILL.md`, `claude/settings.json` e `claude/statusline-command.sh` têm um `home.file` individual no `home-common.nix` via `mkOutOfStoreSymlink` — alterações nos arquivos fonte têm efeito imediato sem `dr`
 - `claude/CLAUDE.md` é o global CLAUDE.md (`~/.claude/CLAUDE.md`) — preferências verdadeiramente globais (persona, idioma, comunicação, git, safety rules), carregado sempre em toda conversa/projeto. Editado com frequência direto pelo usuário fora de PR — conferir o arquivo em vez de assumir conteúdo específico
 - `claude/skills/prd-spec-code-workflow/SKILL.md` é o workflow Pesquisa→Spec→Code (`~/.claude/skills/prd-spec-code-workflow/SKILL.md`) — carrega sob demanda quando o pedido do usuário bate com a `description` da skill (novo módulo, PRD/spec, mudança de contrato), não em toda conversa. Extraído do CLAUDE.md global para economizar tokens em tarefas triviais; trade-off: ativação depende de matching semântico, não é garantida
 - Nova skill pessoal: arquivo em `claude/skills/<nome>/SKILL.md` + `home.file` correspondente em `home-common.nix` (mesmo padrão `mkOutOfStoreSymlink` + `force = true` do `claude/CLAUDE.md`)
@@ -80,6 +80,7 @@ nix/
 ## Nix — Gotchas
 
 - `nix search nixpkgs` busca no registry global (geralmente unstable), não na versão pinada do flake. Usar: `nix search github:NixOS/nixpkgs/nixpkgs-25.11-darwin <pacote>`
+- Pra checar se uma opção de módulo existe/funciona na versão pinada (ex: `home-manager`), puxar o source direto do rev do `flake.lock`: `curl -s https://raw.githubusercontent.com/nix-community/home-manager/<rev>/modules/programs/<módulo>.nix`
 - `with pkgs;` trata hífens como subtração — pacotes com hífen falham silenciosamente. Usar `pkgs."nome-com-hífen"` dentro de um bloco `with pkgs;`, ou referenciar sem `with`
 - Para checar o default real de uma opção nix-darwin antes de alterá-la: `nix eval ~/repos/github/dotfiles/nix#darwinConfigurations.<Host>.options.<caminho>.default`. Para opções `extraConfig` (texto bruto, ex: `security.sudo.extraConfig`), esse default é sempre `null` — o comportamento real vem da ferramenta subjacente (ex: `man 5 sudoers` para `timestamp_timeout`, 5 min por default)
 
@@ -93,6 +94,7 @@ nix/
 
 - Se um arquivo já existe no sistema e o home-manager tenta gerenciá-lo sem `force = true` e sem `backupCommand` configurado, o rebuild falha com `would be clobbered`
 - Arquivos `.bak` gerados pelo `backupCommand` podem ser removidos com segurança após confirmar que o `dr` criou o symlink corretamente
+- `programs.git.hooks` seta `core.hooksPath` **globalmente** (`~/.config/git/config`), valendo pra todo repo na máquina, não só o repo declarante. Pra escopar a um repo específico, usar `programs.git.includes` com `condition = "gitdir:<path>"` e `contents.core.hooksPath` apontando pro hook
 
 ## README — bootstrap
 
@@ -120,3 +122,5 @@ nix flake update --flake ~/repos/github/dotfiles/nix/
 ## Workflow de alterações
 
 Após qualquer modificação em arquivos `.nix`, executar `nix flake check ~/repos/github/dotfiles/nix/` antes de reportar a tarefa como concluída. Se o check falhar, corrigir antes de continuar.
+
+Em sessões longas com múltiplos tópicos: antes de commitar, conferir `git status`/branch atual. Mudanças não relacionadas ao propósito da branch/PR aberto devem ir para uma branch separada (stash → `checkout main` → nova branch → `stash pop`).
