@@ -1,10 +1,11 @@
 {
+  "model": "sonnet",
   "statusLine": {
     "type": "command",
     "command": "bash /Users/adrianofsantos/.claude/statusline-command.sh"
   },
   "enabledPlugins": {
-    "swift-lsp@claude-plugins-official": true,
+    "swift-lsp@claude-plugins-official": false,
     "claude-md-management@claude-plugins-official": true,
     "commit-commands@claude-plugins-official": true,
     "skill-creator@claude-plugins-official": true,
@@ -19,6 +20,5 @@
       }
     }
   },
-  "tui": "fullscreen",
-  "model": "sonnet"
+  "tui": "fullscreen"
 }

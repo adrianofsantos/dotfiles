@@ -5,156 +5,94 @@
 ```
 dotfiles/
 ├── nix/
-│   ├── flake.nix          # Main system config
+│   ├── flake.nix          # inputs, composição dos hosts (lista de módulos), bloco `let` com valores compartilhados
 │   ├── flake.lock
-│   ├── nix.conf
-│   └── modules/
-│       └── proton.nix     # LaunchAgent for Proton apps
-├── zsh/                   # Shell config (stow-managed)
-├── nvim/                  # LazyVim config (stow-managed)
-├── alacritty/
-├── bat/
-├── bpytop/
-├── starship.toml
-├── fish/
-├── neofetch/
-├── brew/
-├── iterm2/
-└── config.sh              # Stow bootstrap script
+│   ├── user.nix            # dados pessoais (username, email, gpgKey, paths) — criptografado com git-crypt
+│   ├── user.nix.example    # template público de user.nix
+│   ├── modules/
+│   │   ├── common.nix       # Base: usuário, pacotes, Homebrew comum, stateVersion — todos os hosts
+│   │   ├── personal.nix     # Casks/brews/masApps de máquinas pessoais (hoje: Aang e Kyoshi)
+│   │   ├── macos-defaults.nix # system.defaults + Touch ID sudo + security.sudo.extraConfig
+│   │   ├── nix-settings.nix # GC automático (7d), optimise diário, flakes habilitado
+│   │   └── rosetta.nix      # nix-homebrew com Rosetta 2
+│   ├── hosts/
+│   │   ├── aang.nix          # masApps + Dock exclusivos do Aang
+│   │   └── kyoshi.nix        # casks + brews + masApps + Dock exclusivos do Kyoshi
+│   ├── home-common.nix       # Base home-manager: shell, git, neovim, starship, bat, claude configs
+│   ├── home-aang.nix         # imports home-common.nix (sem divergências hoje)
+│   └── home-kyoshi.nix       # imports home-common.nix + lazydocker + docker completions
+├── nvim/, bat/, bpytop/, raycast/, starship.toml, claude/   # dotfiles linkados via mkOutOfStoreSymlink
+└── .claude/skills/dotfiles-manager/   # esta skill
 ```
 
 ## Host Hierarchy
 
+Não existe uma camada nomeada "commonConfiguration"/"personalConfiguration" no código — cada `darwinConfiguration` em `flake.nix` importa a mesma lista de módulos, na ordem:
+
 ```
-commonConfiguration     → All machines (base packages, macOS defaults, nix settings)
-  ├── personalConfiguration  → Personal machines (Proton, Podman, messaging apps)
-  │   ├── aangConfigurations     → Mac "Aang" (aarch64-darwin, dock apps)
-  │   └── kyoshiConfiguration   → Mac "Kyoshi" (aarch64-darwin, dev tools, dock apps)
-  └── (future work configs)
+modules/common.nix       → todos os hosts
+modules/personal.nix     → hosts pessoais (hoje: Aang e Kyoshi, ambos pessoais)
+modules/macos-defaults.nix
+modules/nix-settings.nix
+hosts/<host>.nix         → divergências exclusivas do host
+nix-homebrew.darwinModules.nix-homebrew
+modules/rosetta.nix
+home-manager.darwinModules.home-manager → home-common.nix + home-<host>.nix
 ```
 
 ## Hosts
 
-| Host   | Machine       | Platform        | Role     |
-|--------|--------------|-----------------|----------|
-| Aang   | Mac (older)  | aarch64-darwin  | Personal |
-| Kyoshi | Mac Mini M4  | aarch64-darwin  | Main dev |
+| Host   | Máquina             | Papel               | Divergências principais |
+|--------|--------------------|--------------------|--------------------------|
+| Aang   | MacBook Air        | Uso secundário      | Dock enxuto, masApps iWork/iMovie/GarageBand |
+| Kyoshi | MacBook Pro        | Dev principal        | Docker Desktop, Xcode, homelab tools (talhelper, opentofu), lazydocker |
 
-## Package Layers
+Ambos `aarch64-darwin` (Apple Silicon).
 
-### System Packages (environment.systemPackages)
-bat, eza, fastfetch, fd, fzf, gcal, gitleaks, gnupg, htop, imagemagick, ipcalc, jq, krew, kubecolor, kubectx, lazydocker, lazygit, neovim, ripgrep, starship, stow, tree, wget, zoxide
+## Package Layers (estado atual)
+
+### `environment.systemPackages`
+- `modules/common.nix` (todos os hosts): gcal, git-crypt, gnupg, htop, imagemagick, ipcalc
+- `modules/personal.nix` (pessoais): ipfetch
+
+### `home.packages` (home-manager)
+- `home-common.nix` (todos os hosts): cryptomator-cli (derivação custom), eza, fastfetch, fd, fzf, gitleaks, jq, krew, kubecolor, kubectx, lazygit, neovim, ripgrep, tree, wget
+- `home-kyoshi.nix` (só Kyoshi): lazydocker
+
+### Homebrew Casks
+- `modules/common.nix`: appcleaner, brave-browser, cryptomator, firefox, obsidian, openmtp, visual-studio-code, raycast, warp
+- `modules/personal.nix`: claude, claude-code, discord, fuse-t, proton-drive, proton-mail, proton-pass, protonvpn, telegram, vlc, whatsApp
+- `hosts/kyoshi.nix`: android-studio, balenaetcher, calibre, docker-desktop, obs, ollama-app, proton-drive, qbittorrent, samsung-magician, steam, tradingview, veracrypt-fuse-t
 
 ### Homebrew Brews
-bpytop, gh, watch, mas, talosctl (personal), gemini-cli (Kyoshi)
+- `modules/common.nix`: bpytop, gh, pinentry-mac, watch, mas
+- `modules/personal.nix`: talosctl
+- `hosts/kyoshi.nix`: gemini-cli, irssi, opentofu, talhelper, xcodegen
 
-### Homebrew Casks (common)
-appcleaner, brave-browser, cryptomator, firefox, obsidian, openmtp, raycast, warp
-
-### Homebrew Casks (per-host)
-Aang: chatgpt, google-chrome
-Kyoshi: balenaetcher, calibre, claude, claude-code, discord, docker-desktop, duckduckgo, ollama-app, qbittorrent, shortcat, tradingview, visual-studio-code
-
-### Mac App Store
-Perplexity (both), HP Smart (Kyoshi)
+### Mac App Store (`homebrew.masApps`)
+- `modules/personal.nix`: HP Smart
+- `hosts/aang.nix`: GarageBand, iMovie, Keynote, Numbers, Pages
+- `hosts/kyoshi.nix`: Xcode
 
 ## Adding a Package
 
-1. Determine the layer:
-   - CLI tool → `environment.systemPackages` in `commonConfiguration`
-   - GUI app available as brew cask → `homebrew.casks`
+1. Determine a camada:
+   - CLI tool (nixpkgs, user-level) → `home.packages` em `home-common.nix` ou `home-<host>.nix`
+   - CLI tool (nixpkgs, system-level) → `environment.systemPackages`
+   - GUI app → `homebrew.casks`
    - CLI only in homebrew → `homebrew.brews`
-   - Mac App Store only → `homebrew.masApps` (use `mas search <name>` to find ID)
+   - Mac App Store only → `homebrew.masApps` (use `mas search <name>` para achar o ID)
 
-2. Determine the scope:
-   - All machines → `commonConfiguration`
-   - Personal machines → `personalConfiguration`
-   - Single host → `aangConfigurations` or `kyoshiConfiguration`
+2. Determine o escopo:
+   - Todos os hosts → `modules/common.nix`
+   - Máquinas pessoais → `modules/personal.nix`
+   - Host único → `hosts/aang.nix` ou `hosts/kyoshi.nix` (system) / `home-aang.nix` ou `home-kyoshi.nix` (home-manager)
 
-3. Apply: `sudo darwin-rebuild switch --flake ~/repos/github/dotfiles/nix/`
+3. Rode `nix flake check ~/repos/github/dotfiles/nix/` e aplique: `dr` (`sudo darwin-rebuild switch --flake ~/repos/github/dotfiles/nix/`)
 
-## Home-Manager Migration Path
+## Known Workarounds
 
-### Phase 1: Add home-manager input
-
-IMPORTANT: Use the `release-XX.XX` branch matching your nixpkgs version. Example: nixpkgs-25.05-darwin → release-25.05.
-
-```nix
-inputs = {
-  # existing inputs...
-  home-manager = {
-    url = "github:nix-community/home-manager/release-25.05";
-    inputs.nixpkgs.follows = "nixpkgs";
-  };
-};
-```
-
-### Phase 2: System-level user config (REQUIRED workaround)
-
-home-manager's `nixos/common.nix` tries to read `users.users.<name>.home` from the system config.
-On nix-darwin this is null by default, causing a build error. Fix: set it in `commonConfiguration`:
-
-```nix
-users.users.adrianofsantos.home = "/Users/adrianofsantos";
-```
-
-See: https://github.com/nix-community/home-manager/issues/6557
-
-### Phase 3: Create home module
-```nix
-# In darwinConfigurations modules list, add:
-home-manager.darwinModules.home-manager
-{
-  home-manager = {
-    useGlobalPkgs = true;
-    useUserPackages = true;
-    users.adrianofsantos = import ./home.nix;
-  };
-}
-```
-
-### Phase 4: Migrate dotfiles incrementally
-
-NOTE: `programs.zsh.initExtra` is deprecated since home-manager 25.05. Use `initContent` instead.
-
-For tools with complex configs (starship, alacritty), use `mkOutOfStoreSymlink` to reference the
-existing config files instead of converting them to Nix. This keeps configs editable outside Nix.
-
-```nix
-# home.nix
-{ config, pkgs, ... }: {
-  home.username = "adrianofsantos";
-  home.homeDirectory = "/Users/adrianofsantos";
-  home.stateVersion = "24.05";
-
-  programs.zsh = {
-    enable = true;
-    shellAliases = { /* ... */ };
-    initContent = ''
-      eval "$(starship init zsh)"
-      eval "$(zoxide init zsh)"
-    '';
-    sessionVariables = {
-      EDITOR = "nvim";
-      VISUAL = "nvim";
-    };
-  };
-
-  # Reference existing config files via symlink (no Nix conversion needed)
-  xdg.configFile."starship.toml".source = config.lib.file.mkOutOfStoreSymlink
-    "/Users/adrianofsantos/repos/github/dotfiles/starship.toml";
-  xdg.configFile."nvim".source = config.lib.file.mkOutOfStoreSymlink
-    "/Users/adrianofsantos/repos/github/dotfiles/nvim";
-  xdg.configFile."alacritty".source = config.lib.file.mkOutOfStoreSymlink
-    "/Users/adrianofsantos/repos/github/dotfiles/alacritty";
-}
-```
-
-### Migration Order (recommended)
-1. ✅ zsh (biggest win — eliminates .zshrc, aliases.zsh, functions.zsh)
-2. ✅ starship (symlink to existing toml)
-3. ✅ bat (config via programs.bat + symlink themes)
-4. ✅ alacritty (symlink to existing toml)
-5. nvim (keep as-is with mkOutOfStoreSymlink — LazyVim manages itself)
-6. git (if adding git config later)
-7. Remove stow dependency from flake.nix
+- `users.users.${user.username}.home` em `modules/common.nix`: necessário porque home-manager seta `homeDirectory` como `null` no Darwin por default (bugs [#6557](https://github.com/nix-community/home-manager/issues/6557), #6036, #6743)
+- `programs.zsh.initExtra` está deprecado desde home-manager 25.05 — usar `initContent` (já em uso em `home-common.nix`)
+- Branch do home-manager deve seguir a mesma versão do `nixpkgs` pinado em `flake.nix` (hoje `nixpkgs-25.11-darwin` → `home-manager/release-25.11`). Não usar `master`
+- Configs complexas (nvim, bat/themes, bpytop, raycast, starship.toml, claude/) usam `mkOutOfStoreSymlink` apontando para o repositório git em vez de serem convertidas para Nix puro — mantém os arquivos editáveis fora do Nix
