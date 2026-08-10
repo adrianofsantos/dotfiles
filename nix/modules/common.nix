@@ -26,10 +26,11 @@
       "brave-browser"
       "cryptomator"
       "firefox"
+      "ghostty"
       "obsidian"
       "openmtp"
-      "visual-studio-code"
       "raycast"
+      "visual-studio-code"
       "warp"
     ];
     brews = [
