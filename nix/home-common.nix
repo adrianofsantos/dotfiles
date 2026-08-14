@@ -122,6 +122,44 @@ in
     };
   };
 
+  # zsh-autosuggestions não está habilitado neste repo (nenhuma referência a
+  # programs.zsh.autosuggestion hoje). Se for habilitado no futuro: o atuin
+  # (crates/atuin/src/shell/atuin.zsh) reatribui ZSH_AUTOSUGGEST_STRATEGY
+  # incondicionalmente ao inicializar, ignorando --disable-up-arrow. Pra
+  # preservar uma strategy custom (ex: match_prev_cmd), reatribuir a variável
+  # num bloco com lib.mkOrder > 1000 (o initContent do atuin roda em 1000).
+  programs.atuin = {
+    enable = true;
+    enableZshIntegration = true;
+    # Sem --disable-up-arrow nem --disable-ctrl-r: atuin assume os dois binds.
+    daemon.enable = true;
+
+    settings = {
+      search_mode = "daemon-fuzzy";
+      daemon.autostart = true;
+
+      # Fase 1: só local. Fase 2 (sync self-hosted) muda apenas isto:
+      #   auto_sync = true;
+      #   sync_address = "https://<host self-hosted>";
+      #   dotfiles.enabled = true; (se for usar sync de dotfiles do atuin)
+      auto_sync = false;
+
+      workspaces = true;
+      enter_accept = true;
+      store_failed = true;
+
+      history_filter = [
+        # "^secret-cmd"
+        # "^innocuous-cmd .*--secret=.+"
+      ];
+      cwd_filter = [
+        # "^/very/secret/area"
+      ];
+
+      ui.columns = [ "duration" "time" "host" "command" ];
+    };
+  };
+
   programs.zoxide = {
     enable = true;
     enableZshIntegration = true;
