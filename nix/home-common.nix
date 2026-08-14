@@ -227,6 +227,10 @@ in
     source = config.lib.file.mkOutOfStoreSymlink "${user.dotfilesDir}/claude/skills/prd-spec-code-workflow/SKILL.md";
     force = true;
   };
+  home.file.".claude/skills/verify/SKILL.md" = {
+    source = config.lib.file.mkOutOfStoreSymlink "${user.dotfilesDir}/claude/skills/verify/SKILL.md";
+    force = true;
+  };
   home.file.".claude/statusline-command.sh" = {
     source = config.lib.file.mkOutOfStoreSymlink "${user.dotfilesDir}/claude/statusline-command.sh";
     force = true;

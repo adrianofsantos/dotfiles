@@ -39,7 +39,7 @@ nix/
 - `homebrew.onActivation.cleanup = "zap"` remove **qualquer** pacote brew não declarado em nenhum módulo no próximo `dr` — se instalar algo manualmente com `brew install`, declarar no módulo correspondente ou será desinstalado
 - `brew cleanup` pode falhar com `Error: No such file or directory @ dir_s_rmdir` durante o `brew bundle` do `dr` — race condition cosmética no cache do Homebrew, não indica falha do upgrade (que já terminou antes do cleanup rodar). Seguro ignorar
 - `dr` upgrading ~20 casks/masApps costuma passar dos 5 min default do `sudo` `timestamp_timeout`, causando pedidos repetidos de senha (às vezes com Touch ID falhando e caindo para senha manual). Corrigido via `security.sudo.extraConfig` (`timestamp_timeout=15`) em `macos-defaults.nix`
-- Pacote muito recente para estar no nixpkgs pinado (`nix search github:NixOS/nixpkgs/nixpkgs-25.11-darwin <pacote>` não retorna nada): preferir Homebrew formula em `brews` a manter um flake input de terceiro — evita overhead de pin próprio sem necessidade real
+- Pacote muito recente para estar no nixpkgs pinado (`nix search github:NixOS/nixpkgs/nixpkgs-26.05-darwin <pacote>` não retorna nada): preferir Homebrew formula em `brews` a manter um flake input de terceiro — evita overhead de pin próprio sem necessidade real
 
 ## Decisões arquiteturais
 
@@ -72,6 +72,7 @@ nix/
 - `~/.gnupg/gpg-agent.conf` gerenciado manualmente (não via home-manager) com `pinentry-program /opt/homebrew/bin/pinentry-mac`
 - Sem pinentry: `git commit` falha com `gpg: signing failed: No pinentry`
 - Após alterar gpg-agent: logout/login obrigatório (agente antigo continua na sessão)
+- Se `gpg-agent.conf` estiver ausente (não só desatualizado), recriar o arquivo e rodar `gpgconf --kill gpg-agent` resolve sem logout/login — o agente sobe de novo sob demanda já lendo a config nova
 
 ## Git / SSH
 
@@ -79,8 +80,9 @@ nix/
 
 ## Nix — Gotchas
 
-- `nix search nixpkgs` busca no registry global (geralmente unstable), não na versão pinada do flake. Usar: `nix search github:NixOS/nixpkgs/nixpkgs-25.11-darwin <pacote>`
+- `nix search nixpkgs` busca no registry global (geralmente unstable), não na versão pinada do flake. Usar: `nix search github:NixOS/nixpkgs/nixpkgs-26.05-darwin <pacote>`
 - Pra checar se uma opção de módulo existe/funciona na versão pinada (ex: `home-manager`), puxar o source direto do rev do `flake.lock`: `curl -s https://raw.githubusercontent.com/nix-community/home-manager/<rev>/modules/programs/<módulo>.nix`
+- Módulos com `settings` livre (ex: `programs.atuin.settings`, TOML sem schema no Nix) não são validados pelo `nix flake check` — uma chave inexistente só falha em runtime da ferramenta, ou nem falha. Conferir contra o fonte/docs da ferramenta na versão pinada do nixpkgs antes de escrever, não assumir nomes "prováveis"
 - `with pkgs;` trata hífens como subtração — pacotes com hífen falham silenciosamente. Usar `pkgs."nome-com-hífen"` dentro de um bloco `with pkgs;`, ou referenciar sem `with`
 - Para checar o default real de uma opção nix-darwin antes de alterá-la: `nix eval ~/repos/github/dotfiles/nix#darwinConfigurations.<Host>.options.<caminho>.default`. Para opções `extraConfig` (texto bruto, ex: `security.sudo.extraConfig`), esse default é sempre `null` — o comportamento real vem da ferramenta subjacente (ex: `man 5 sudoers` para `timestamp_timeout`, 5 min por default)
 
