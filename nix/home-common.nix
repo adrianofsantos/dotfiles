@@ -130,6 +130,12 @@ in
       # ZSH_AUTOSUGGEST_STRATEGY=(atuin match_prev_cmd history).
       strategy = [ "match_prev_cmd" "history" ];
     };
+
+    # highlighter "main" (default) colore comando válido no PATH de verde
+    # e inválido/typo de vermelho. mkOrder 1200, sourced por último — depois
+    # de autosuggestion (700) e do initContent do atuin (1000), como exigido
+    # pelo próprio zsh-syntax-highlighting.
+    syntaxHighlighting.enable = true;
   };
 
   programs.atuin = {
