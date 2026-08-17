@@ -39,6 +39,7 @@ nix/
 - `homebrew.onActivation.cleanup = "zap"` remove **qualquer** pacote brew não declarado em nenhum módulo no próximo `dr` — se instalar algo manualmente com `brew install`, declarar no módulo correspondente ou será desinstalado
 - `brew cleanup` pode falhar com `Error: No such file or directory @ dir_s_rmdir` durante o `brew bundle` do `dr` — race condition cosmética no cache do Homebrew, não indica falha do upgrade (que já terminou antes do cleanup rodar). Seguro ignorar
 - `dr` upgrading ~20 casks/masApps costuma passar dos 5 min default do `sudo` `timestamp_timeout`, causando pedidos repetidos de senha (às vezes com Touch ID falhando e caindo para senha manual). Corrigido via `security.sudo.extraConfig` (`timestamp_timeout=15`) em `macos-defaults.nix`
+- `timestamp_timeout=15` só evita prompt repetido dentro do **mesmo terminal**: o default do sudo (`man 5 sudoers`) pra `timestamp_type` é `tty`, cache por terminal + session id, não só por tempo. Rodar `dr` em panes/abas diferentes (ex: herdr, tmux) pede senha de novo mesmo dentro da janela de 15 min. Pra cache único entre todas as sessões do usuário: `Defaults timestamp_type=global` no mesmo `security.sudo.extraConfig` — trade-off: reduz isolamento por terminal
 - Pacote muito recente para estar no nixpkgs pinado (`nix search github:NixOS/nixpkgs/nixpkgs-26.05-darwin <pacote>` não retorna nada): preferir Homebrew formula em `brews` a manter um flake input de terceiro — evita overhead de pin próprio sem necessidade real
 
 ## Decisões arquiteturais
