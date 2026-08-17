@@ -51,3 +51,6 @@ id_ed25519
 
 # FUSE temp files
 .fuse_hidden*
+
+# Nix build output (dr-build / dr-review)
+result
