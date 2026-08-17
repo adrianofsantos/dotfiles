@@ -120,14 +120,24 @@ in
       VISUAL = "nvim";
       NIX_CONF_DIR = "$HOME/.config/nix";
     };
+
+    autosuggestion = {
+      enable = true;
+      # match_prev_cmd, depois history — usado como fallback: o atuin
+      # (initContent em mkOrder 1000, depois do mkOrder 700 daqui) se
+      # prepende sozinho como primeira estratégia ao inicializar
+      # (crates/atuin/src/shell/atuin.zsh, incondicional). Ordem final:
+      # ZSH_AUTOSUGGEST_STRATEGY=(atuin match_prev_cmd history).
+      strategy = [ "match_prev_cmd" "history" ];
+    };
+
+    # highlighter "main" (default) colore comando válido no PATH de verde
+    # e inválido/typo de vermelho. mkOrder 1200, sourced por último — depois
+    # de autosuggestion (700) e do initContent do atuin (1000), como exigido
+    # pelo próprio zsh-syntax-highlighting.
+    syntaxHighlighting.enable = true;
   };
 
-  # zsh-autosuggestions não está habilitado neste repo (nenhuma referência a
-  # programs.zsh.autosuggestion hoje). Se for habilitado no futuro: o atuin
-  # (crates/atuin/src/shell/atuin.zsh) reatribui ZSH_AUTOSUGGEST_STRATEGY
-  # incondicionalmente ao inicializar, ignorando --disable-up-arrow. Pra
-  # preservar uma strategy custom (ex: match_prev_cmd), reatribuir a variável
-  # num bloco com lib.mkOrder > 1000 (o initContent do atuin roda em 1000).
   programs.atuin = {
     enable = true;
     enableZshIntegration = true;

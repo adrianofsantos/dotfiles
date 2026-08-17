@@ -17,7 +17,7 @@ nix/
 ├── hosts/
 │   ├── aang.nix           # Dock + casks exclusivos (chatgpt, google-chrome)
 │   └── kyoshi.nix         # Dock + casks + brews exclusivos (docker, steam, homelab tools)
-├── home-common.nix        # Base home-manager: shell, git, neovim, starship, claude configs
+├── home-common.nix        # Base home-manager: shell, git, neovim, starship, atuin, claude configs
 ├── home-aang.nix          # imports home-common (sem lazydocker, sem docker completions)
 └── home-kyoshi.nix        # imports home-common + lazydocker + docker completions
 ```
@@ -125,4 +125,4 @@ nix flake update --flake ~/repos/github/dotfiles/nix/
 
 Após qualquer modificação em arquivos `.nix`, executar `nix flake check ~/repos/github/dotfiles/nix/` antes de reportar a tarefa como concluída. Se o check falhar, corrigir antes de continuar.
 
-Em sessões longas com múltiplos tópicos: antes de commitar, conferir `git status`/branch atual. Mudanças não relacionadas ao propósito da branch/PR aberto devem ir para uma branch separada (stash → `checkout main` → nova branch → `stash pop`).
+Em sessões longas com múltiplos tópicos: antes de commitar, conferir `git status`/branch atual. Mudanças não relacionadas ao propósito da branch/PR aberto devem ir para uma branch separada (stash → `checkout main` → nova branch → `stash pop`). Se só parte dos arquivos modificados pertence ao tópico (ex: `nix/flake.lock` mudou sozinho no meio da sessão), usar `git stash push -u -m "<msg>" -- <paths>` pra stashar só esses arquivos, deixando o resto intacto na branch atual.
