@@ -39,6 +39,7 @@ nix/
 - `homebrew.onActivation.cleanup = "zap"` remove **qualquer** pacote brew não declarado em nenhum módulo no próximo `dr` — se instalar algo manualmente com `brew install`, declarar no módulo correspondente ou será desinstalado
 - `brew cleanup` pode falhar com `Error: No such file or directory @ dir_s_rmdir` durante o `brew bundle` do `dr` — race condition cosmética no cache do Homebrew, não indica falha do upgrade (que já terminou antes do cleanup rodar). Seguro ignorar
 - `dr` upgrading ~20 casks/masApps costuma passar dos 5 min default do `sudo` `timestamp_timeout`, causando pedidos repetidos de senha (às vezes com Touch ID falhando e caindo para senha manual). Corrigido via `security.sudo.extraConfig` (`timestamp_timeout=15`) em `macos-defaults.nix`
+- `timestamp_timeout=15` só evita prompt repetido dentro do **mesmo terminal**: o default do sudo (`man 5 sudoers`) pra `timestamp_type` é `tty`, cache por terminal + session id, não só por tempo. Rodar `dr` em panes/abas diferentes (ex: herdr, tmux) pede senha de novo mesmo dentro da janela de 15 min. Pra cache único entre todas as sessões do usuário: `Defaults timestamp_type=global` no mesmo `security.sudo.extraConfig` — trade-off: reduz isolamento por terminal
 - Pacote muito recente para estar no nixpkgs pinado (`nix search github:NixOS/nixpkgs/nixpkgs-26.05-darwin <pacote>` não retorna nada): preferir Homebrew formula em `brews` a manter um flake input de terceiro — evita overhead de pin próprio sem necessidade real
 
 ## Decisões arquiteturais
@@ -97,6 +98,7 @@ nix/
 - Se um arquivo já existe no sistema e o home-manager tenta gerenciá-lo sem `force = true` e sem `backupCommand` configurado, o rebuild falha com `would be clobbered`
 - Arquivos `.bak` gerados pelo `backupCommand` podem ser removidos com segurança após confirmar que o `dr` criou o symlink corretamente
 - `programs.git.hooks` seta `core.hooksPath` **globalmente** (`~/.config/git/config`), valendo pra todo repo na máquina, não só o repo declarante. Pra escopar a um repo específico, usar `programs.git.includes` com `condition = "gitdir:<path>"` e `contents.core.hooksPath` apontando pro hook
+- `programs.zsh.initContent` do usuário (valor sem wrapper) renderiza em `mkOrder 1000`; `shellAliases` vira `alias ...` só depois, em `mkOrder 1100` (conferido no source do home-manager pinado). Uma `function` declarada no `initContent` não pode chamar um alias pelo nome: o zsh expande aliases no *parse* da function, não a cada chamada, então o alias ainda não existe e a function fica travada chamando um comando inexistente (testado: `command not found`). Repetir o comando raw dentro da function, não depender do alias.
 
 ## README — bootstrap
 
@@ -120,6 +122,8 @@ dr-build   # alias para: sudo darwin-rebuild build --flake ~/repos/github/dotfil
 # Atualizar dependências do flake (pinagem de versões)
 nix flake update --flake ~/repos/github/dotfiles/nix/
 ```
+
+`dr-build` builda sem ativar e deixa `./result` (out-link padrão do `nix build`; o script do darwin-rebuild só passa `--no-link` quando a ação não é `build`, então `dr`/`switch` nunca cria esse link). `result` está no `.gitignore`. `dr-review` (function em `home-common.nix`) builda, mostra `result/darwin-changes` e o diff de pacotes contra a geração ativa antes de você rodar `dr` de verdade — usar `nix store diff-closures /run/current-system ./result` (caminho explícito com `./`, `result` puro é lido como flake ref e falha).
 
 ## Workflow de alterações
 

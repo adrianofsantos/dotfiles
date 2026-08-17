@@ -113,6 +113,21 @@ in
 
       # gitignore.io helper
       function gi() { curl -sLw "\n" https://www.toptal.com/developers/gitignore/api/$@ ;}
+
+      # Builda, mostra o changelog do nix-darwin e o diff de pacotes contra a
+      # geração ativa, sem ativar nada. Roda `dr` manualmente depois pra confirmar.
+      function dr-review() {
+        (
+          cd ~/repos/github/dotfiles || return 1
+          sudo darwin-rebuild build --flake ~/repos/github/dotfiles/nix/ || return 1
+          echo
+          echo "--- darwin-changes ---"
+          bat --paging=never result/darwin-changes
+          echo
+          echo "--- diff-closures (geração ativa -> result) ---"
+          nix store diff-closures /run/current-system ./result
+        )
+      }
     '';
 
     sessionVariables = {
