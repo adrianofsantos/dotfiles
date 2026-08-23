@@ -8,6 +8,7 @@
 
   fonts.packages = with pkgs; [
     nerd-fonts.hack
+    nerd-fonts.proggy-clean-tt
   ];
 
   environment.systemPackages = with pkgs; [
