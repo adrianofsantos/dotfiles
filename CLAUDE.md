@@ -60,6 +60,12 @@ nix/
 - Após bootstrap: rodar `claude` para autenticar via browser antes de usar
 - Plugins em `~/.claude/plugins/installed_plugins.json` com `"scope": "project"` presos a um `projectPath` que não bate com o diretório atual não carregam, mesmo com `enabledPlugins: true` no `settings.json`. Corrigir via `/plugin` (reinstalar como `user` scope, igual ao plugin `warp`) e rodar `/reload-plugins` para aplicar
 
+## Ghostty
+
+- Config real do Ghostty no macOS: `~/Library/Application Support/com.mitchellh.ghostty/config` (não `~/.config/ghostty/config`). Gerenciado via `home.file."Library/Application Support/com.mitchellh.ghostty/config"` em `home-common.nix`, mesmo padrão `mkOutOfStoreSymlink` + `force = true` dos outros arquivos out-of-store — efeito imediato, sem precisar de `dr`
+- Diagnóstico: `ghostty +show-config` (config efetivo já mergeado), `ghostty +list-fonts`, `ghostty +list-themes`
+- Fontes bitmap (ex: ProggyClean) são desenhadas pixel-perfect só no tamanho nativo (~13px); escalar pra outro tamanho sempre borra, não tem ajuste de config que resolva mantendo a mesma fonte
+
 ## Segurança
 
 - Hook de pre-commit (gitleaks, bloqueia commits com secrets) é declarativo via `programs.git.hooks.pre-commit` em `home-common.nix`, apontando pra `nix/git-hooks/pre-commit`. Aplicado globalmente (`core.hooksPath` em `~/.config/git/config`, vale pra todo repo na máquina) no próximo `dr` — sem passo manual de bootstrap
@@ -83,7 +89,7 @@ nix/
 ## Nix — Gotchas
 
 - `nix search nixpkgs` busca no registry global (geralmente unstable), não na versão pinada do flake. Usar: `nix search github:NixOS/nixpkgs/nixpkgs-26.05-darwin <pacote>`
-- Pra checar se uma opção de módulo existe/funciona na versão pinada (ex: `home-manager`), puxar o source direto do rev do `flake.lock`: `curl -s https://raw.githubusercontent.com/nix-community/home-manager/<rev>/modules/programs/<módulo>.nix`
+- Pra checar se uma opção de módulo existe/funciona na versão pinada (ex: `home-manager`), puxar o source direto do rev do `flake.lock`: `curl -s https://raw.githubusercontent.com/nix-community/home-manager/<rev>/modules/programs/<módulo>.nix`. Se `curl`/`WebFetch` pra `raw.githubusercontent.com` ou `github.com/blob/...` falhar (rede bloqueia, retorna vazio/404): `nix flake metadata "github:nix-community/home-manager/<rev>" --json` retorna o `path` do source já baixado em `/nix/store` — dá pra `grep`/`cat` direto, sem depender de rede externa. `api.github.com` (contents/search API) via WebFetch costuma funcionar mesmo quando `raw.githubusercontent.com` não funciona
 - Módulos com `settings` livre (ex: `programs.atuin.settings`, TOML sem schema no Nix) não são validados pelo `nix flake check` — uma chave inexistente só falha em runtime da ferramenta, ou nem falha. Conferir contra o fonte/docs da ferramenta na versão pinada do nixpkgs antes de escrever, não assumir nomes "prováveis"
 - Hífen em nome de pacote (`nerd-fonts.hack`, `nix-output-monitor`, `pytest-cov`) resolve normalmente sob `with pkgs;` — hífen é caractere válido em identificador Nix. `pkgs."nome"` com aspas só é necessário se o nome não for um identificador válido por outro motivo (ex: começa com dígito, contém `@`/`/`)
 - Para checar o default real de uma opção nix-darwin antes de alterá-la: `nix eval ~/repos/github/dotfiles/nix#darwinConfigurations.<Host>.options.<caminho>.default`. Para opções `extraConfig` (texto bruto, ex: `security.sudo.extraConfig`), esse default é sempre `null` — o comportamento real vem da ferramenta subjacente (ex: `man 5 sudoers` para `timestamp_timeout`, 5 min por default)
@@ -95,6 +101,7 @@ nix/
 - Todo `home.file` ou `xdg.configFile` deve declarar `force` explicitamente, mesmo que seja o valor default (`false`). Valores que diferem do default devem ser declarados sem exceção.
 - Arquivos gerenciados via `mkOutOfStoreSymlink` apontando para o repositório git usam `force = true`: a fonte de verdade está no git, não há nada a preservar no arquivo avulso.
 - `backupCommand` está configurado globalmente no `flake.nix` para ambos os hosts: arquivos com `force = false` que colidiriam são renomeados para `.bak` e uma linha é impressa no terminal durante o `dr`. Arquivos com `force = true` sobrescrevem diretamente sem backup.
+- `programs.zsh.syntaxHighlighting` é submodule, não bool: `enable`, `package`, `highlighters`, `patterns` (`ZSH_HIGHLIGHT_PATTERNS`, glob literal por comando), `styles` (`ZSH_HIGHLIGHT_STYLES`, ex: `styles.path = "fg=#89b4fa,underline"`). Estilo default do highlighter `main` pra path válido é só `underline`, sem cor
 
 ## home-manager — Gotchas
 
