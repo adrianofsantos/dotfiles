@@ -85,8 +85,10 @@ nix/
 - `nix search nixpkgs` busca no registry global (geralmente unstable), não na versão pinada do flake. Usar: `nix search github:NixOS/nixpkgs/nixpkgs-26.05-darwin <pacote>`
 - Pra checar se uma opção de módulo existe/funciona na versão pinada (ex: `home-manager`), puxar o source direto do rev do `flake.lock`: `curl -s https://raw.githubusercontent.com/nix-community/home-manager/<rev>/modules/programs/<módulo>.nix`
 - Módulos com `settings` livre (ex: `programs.atuin.settings`, TOML sem schema no Nix) não são validados pelo `nix flake check` — uma chave inexistente só falha em runtime da ferramenta, ou nem falha. Conferir contra o fonte/docs da ferramenta na versão pinada do nixpkgs antes de escrever, não assumir nomes "prováveis"
-- `with pkgs;` trata hífens como subtração — pacotes com hífen falham silenciosamente. Usar `pkgs."nome-com-hífen"` dentro de um bloco `with pkgs;`, ou referenciar sem `with`
+- Hífen em nome de pacote (`nerd-fonts.hack`, `nix-output-monitor`, `pytest-cov`) resolve normalmente sob `with pkgs;` — hífen é caractere válido em identificador Nix. `pkgs."nome"` com aspas só é necessário se o nome não for um identificador válido por outro motivo (ex: começa com dígito, contém `@`/`/`)
 - Para checar o default real de uma opção nix-darwin antes de alterá-la: `nix eval ~/repos/github/dotfiles/nix#darwinConfigurations.<Host>.options.<caminho>.default`. Para opções `extraConfig` (texto bruto, ex: `security.sudo.extraConfig`), esse default é sempre `null` — o comportamento real vem da ferramenta subjacente (ex: `man 5 sudoers` para `timestamp_timeout`, 5 min por default)
+- `nix flake check` não força avaliação de todo `config` (é lazy) — erro de sintaxe numa lista/atributo (ex: vírgula sobrando em `fonts.packages`) pode passar despercebido. Pra forçar: `nix eval .#darwinConfigurations.<Host>.config.<caminho>`
+- Pra achar o arquivo fonte que define um pacote/atributo do nixpkgs (confirmar nome/existência antes de usar): `nix eval .#darwinConfigurations.<Host>.pkgs.<atributo>.meta.position` retorna `<store-path>/pkgs/.../default.nix:<linha>`, já baixado em `/nix/store` — dá pra `cat`/`ls` direto. Alternativa interativa: `nix repl`, `:lf .`, TAB-complete em `darwinConfigurations.<Host>.pkgs.<prefixo>`
 
 ## home-manager — Convenções
 
