@@ -20,5 +20,7 @@
       }
     }
   },
-  "tui": "fullscreen"
+  "tui": "fullscreen",
+  "agentPushNotifEnabled": true,
+  "hooks": {"SessionStart":[{"matcher":"*","hooks":[{"type":"command","command":"bash '/Users/adrianofsantos/.claude/hooks/herdr-agent-state.sh' session","timeout":10}]}]}
 }
