@@ -150,7 +150,12 @@ in
     # e inválido/typo de vermelho. mkOrder 1200, sourced por último — depois
     # de autosuggestion (700) e do initContent do atuin (1000), como exigido
     # pelo próprio zsh-syntax-highlighting.
-    syntaxHighlighting.enable = true;
+    syntaxHighlighting = {
+      enable = true;
+      # Default do highlighter "main" pra path válido é só "underline", sem
+      # cor. fg=#89b4fa é o "blue" do Catppuccin Mocha (tema do Ghostty).
+      styles.path = "fg=#89b4fa,underline";
+    };
   };
 
   programs.atuin = {
@@ -262,6 +267,11 @@ in
   };
   home.file.".claude/settings.json" = {
     source = config.lib.file.mkOutOfStoreSymlink "${user.dotfilesDir}/claude/settings.json";
+    force = true;
+  };
+
+  home.file."Library/Application Support/com.mitchellh.ghostty/config" = {
+    source = config.lib.file.mkOutOfStoreSymlink "${user.dotfilesDir}/ghostty/config";
     force = true;
   };
 }
