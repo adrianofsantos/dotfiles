@@ -3,6 +3,20 @@
 Repositório de dotfiles para macOS com nix-darwin + home-manager.
 Dois hosts Apple Silicon: **Aang** (MacBook Air, uso secundário) e **Kyoshi** (MacBook Pro, desenvolvimento principal).
 
+## Estrutura do repositório
+
+```
+.
+├── nix/            # nix-darwin + home-manager — ver "Estrutura dos módulos Nix" abaixo
+├── claude/         # fonte de verdade do Claude Code (CLAUDE.md global, skills, settings.json, statusline) — symlink direto via home-common.nix
+├── nvim/           # config Neovim/LazyVim — symlink via mkOutOfStoreSymlink, requer `dr` pra ter efeito
+├── bpytop/         # config bpytop — symlink via mkOutOfStoreSymlink
+├── raycast/        # extensions/scripts do Raycast
+├── bat/themes/     # tema custom do bat
+├── starship.toml   # prompt do shell
+└── README.md       # guia canônico de bootstrap (setup em máquina nova)
+```
+
 ## Estrutura dos módulos Nix
 
 ```
@@ -59,6 +73,7 @@ nix/
 - `claude/settings.json` e `claude/statusline-command.sh` são públicos no repositório — não incluir tokens, chaves ou dados pessoais nesses arquivos
 - Após bootstrap: rodar `claude` para autenticar via browser antes de usar
 - Plugins em `~/.claude/plugins/installed_plugins.json` com `"scope": "project"` presos a um `projectPath` que não bate com o diretório atual não carregam, mesmo com `enabledPlugins: true` no `settings.json`. Corrigir via `/plugin` (reinstalar como `user` scope, igual ao plugin `warp`) e rodar `/reload-plugins` para aplicar
+- Testar `claude/statusline-command.sh` localmente sem sessão real: `echo '{"workspace":{"current_dir":"..."},"model":{"display_name":"..."}}' | bash claude/statusline-command.sh`. Campos ausentes no JSON devem degradar graciosamente (a maioria dos campos do schema do Claude Code, como `rate_limits` e `prompt_cache`, só aparece depois da primeira resposta da API ou para contas Pro/Max)
 
 ## Ghostty
 
@@ -95,6 +110,7 @@ nix/
 - Para checar o default real de uma opção nix-darwin antes de alterá-la: `nix eval ~/repos/github/dotfiles/nix#darwinConfigurations.<Host>.options.<caminho>.default`. Para opções `extraConfig` (texto bruto, ex: `security.sudo.extraConfig`), esse default é sempre `null` — o comportamento real vem da ferramenta subjacente (ex: `man 5 sudoers` para `timestamp_timeout`, 5 min por default)
 - `nix flake check` não força avaliação de todo `config` (é lazy) — erro de sintaxe numa lista/atributo (ex: vírgula sobrando em `fonts.packages`) pode passar despercebido. Pra forçar: `nix eval .#darwinConfigurations.<Host>.config.<caminho>`
 - Pra achar o arquivo fonte que define um pacote/atributo do nixpkgs (confirmar nome/existência antes de usar): `nix eval .#darwinConfigurations.<Host>.pkgs.<atributo>.meta.position` retorna `<store-path>/pkgs/.../default.nix:<linha>`, já baixado em `/nix/store` — dá pra `cat`/`ls` direto. Alternativa interativa: `nix repl`, `:lf .`, TAB-complete em `darwinConfigurations.<Host>.pkgs.<prefixo>`
+- `ls` é alias para `eza --icons` neste ambiente (zsh). `eza -d` com glob de trailing slash (`ls -td dir/*/`) ignora `-d` e lista o conteúdo do diretório em vez do diretório em si — quebra silenciosamente ao testar comandos interativamente via shell. Scripts `#!/usr/bin/env bash` não são afetados (não carregam `.zshrc`), mas testes interativos devem usar `command ls` para reproduzir o comportamento real do script
 
 ## home-manager — Convenções
 
@@ -139,4 +155,6 @@ nix flake update --flake ~/repos/github/dotfiles/nix/
 
 Após qualquer modificação em arquivos `.nix`, executar `nix flake check ~/repos/github/dotfiles/nix/` antes de reportar a tarefa como concluída. Se o check falhar, corrigir antes de continuar.
 
-Em sessões longas com múltiplos tópicos: antes de commitar, conferir `git status`/branch atual. Por padrão, mudanças não relacionadas ao tópico principal da branch/PR viram **commits separados na própria branch atual** (mensagem própria por tópico, `git add <paths>` específicos em vez de `git add -A`), não branch nova. Migrar pra uma branch dedicada (stash → `checkout main` → nova branch → `stash pop`) só quando a alteração não relacionada for grande o suficiente pra merecer PR e review próprios (ex: novo módulo, refactor, mudança de contrato). Atualizações incidentais pequenas, como `claude/settings.json` ou `nix/flake.lock` mudando sozinho no meio da sessão, ficam como commit separado na branch atual, sem branch dedicada.
+Ao iniciar um tópico novo que não deve se misturar com o trabalho em andamento na sessão atual, preferir abrir uma sessão separada com `claude --worktree <nome>` a stash/checkout no meio da sessão atual: cada sessão fica isolada em sua própria git worktree (`.claude/worktrees/<nome>/`, branch `worktree-<nome>`), sem risco de colisão de arquivo entre os dois tópicos. Adicionar `.claude/worktrees/` ao `.gitignore` do repo.
+
+Reservar o fluxo stash → `checkout main` → nova branch → `stash pop` para quando a mudança não relacionada já aconteceu sem querer no meio da sessão atual (ex: `nix/flake.lock` mudou sozinho) e precisa só ser separada antes de commitar — nesse caso não há como voltar pra uma worktree que não existia desde o início. Se só parte dos arquivos modificados pertence ao tópico, usar `git stash push -u -m "<msg>" -- <paths>` pra stashar só esses arquivos, deixando o resto intacto na branch atual.

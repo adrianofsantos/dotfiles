@@ -24,13 +24,20 @@
     "commit-commands@claude-plugins-official": true,
     "skill-creator@claude-plugins-official": true,
     "hookify@claude-plugins-official": true,
-    "warp@claude-code-warp": true
+    "warp@claude-code-warp": true,
+    "daily.dev@daily.dev": true
   },
   "extraKnownMarketplaces": {
     "claude-code-warp": {
       "source": {
         "source": "github",
         "repo": "warpdotdev/claude-code-warp"
+      }
+    },
+    "daily.dev": {
+      "source": {
+        "source": "github",
+        "repo": "dailydotdev/daily"
       }
     }
   },
@@ -64,5 +71,8 @@
       "**Org-specific CLIs**: None configured — routine project CLIs observed: `nix`, `darwin-rebuild` (via `dr`/`dr-build`/`dr-check` aliases), `gpgconf`, `launchctl`, `ssh-add`, `defaults`, `ghostty`, `hostname`",
       "routine under /Users/adrianofsantos/repos/github/dotfiles/ prefix: Nix module edits, `nix flake check`, `dr`/`dr-build`/`dr-check`, gitleaks security-audit scripts, home-manager dotfile symlink management"
     ]
-  }
+  },
+  "theme": "dark-daltonized",
+  "preferredNotifChannel": "ghostty",
+  "inputNeededNotifEnabled": true
 }

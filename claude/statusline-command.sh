@@ -62,6 +62,15 @@ if command -v kubectl >/dev/null 2>&1; then
   fi
 fi
 
+# --- Worktree session (present only while this session runs in a Claude Code-managed worktree) ---
+worktree_name=$(echo "$input" | jq -r '.worktree.name // empty')
+worktree_branch=$(echo "$input" | jq -r '.worktree.branch // empty')
+worktree_part=""
+if [ -n "$worktree_name" ]; then
+  worktree_part="   wt:${worktree_name}"
+  [ -n "$worktree_branch" ] && worktree_part="${worktree_part}(${worktree_branch})"
+fi
+
 # --- Context usage indicator ---
 # >= 90%: (!)  |  >= 60%: ⚠  |  < 60%: plain
 ctx_part=""
@@ -80,7 +89,7 @@ fi
 time_now=$(date +%H:%M)
 
 # --- Assemble status line ---
-# Format:  󰀵 adriano@machine  ~/path/to/dir   branch*  nix:env  k8s:ctx  | ctx:42%  |  Claude Sonnet  |  14:32
+# Format:  󰀵 adriano@machine  ~/path/to/dir   branch*  nix:env  k8s:ctx  wt:name(branch)  | ctx:42%  |  Claude Sonnet  |  14:32
 parts="󰀵 ${user}@${host}  ${dir_display}"
 
 if [ -n "$git_branch" ]; then
@@ -90,7 +99,88 @@ fi
 
 [ -n "$nix_part" ] && parts="${parts}${nix_part}"
 [ -n "$kube_part" ] && parts="${parts}${kube_part}"
+[ -n "$worktree_part" ] && parts="${parts}${worktree_part}"
 
 parts="${parts}${ctx_part}  |  ${model}  |  ${time_now}"
 
-printf '%s' "$parts"
+# --- Rate limits (5h rolling + 7d weekly) & session cost ---
+# rate_limits is absent for non-subscription accounts and until the first API response
+five_h_pct=$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage // empty')
+five_h_reset=$(echo "$input" | jq -r '.rate_limits.five_hour.resets_at // empty')
+week_pct=$(echo "$input" | jq -r '.rate_limits.seven_day.used_percentage // empty')
+week_reset=$(echo "$input" | jq -r '.rate_limits.seven_day.resets_at // empty')
+cost_usd=$(echo "$input" | jq -r '.cost.total_cost_usd // empty')
+duration_ms=$(echo "$input" | jq -r '.cost.total_duration_ms // empty')
+
+# >= 90%: (!)  |  >= 60%: ⚠  |  < 60%: plain (mirrors ctx_part thresholds above)
+quota_sym() {
+  if [ "$1" -ge 90 ]; then printf '(!)'
+  elif [ "$1" -ge 60 ]; then printf '⚠'
+  fi
+}
+
+usage_part=""
+if [ -n "$five_h_pct" ]; then
+  five_h_int=${five_h_pct%.*}
+  five_h_reset_fmt=""
+  [ -n "$five_h_reset" ] && five_h_reset_fmt=" (reset $(date -r "$five_h_reset" +%H:%M))"
+  usage_part="5h:${five_h_int}%$(quota_sym "$five_h_int")${five_h_reset_fmt}"
+fi
+if [ -n "$week_pct" ]; then
+  week_int=${week_pct%.*}
+  week_reset_fmt=""
+  [ -n "$week_reset" ] && week_reset_fmt=" (reset $(date -r "$week_reset" +"%a %H:%M"))"
+  usage_part="${usage_part:+${usage_part}  }7d:${week_int}%$(quota_sym "$week_int")${week_reset_fmt}"
+fi
+if [ -n "$cost_usd" ]; then
+  cost_fmt=$(printf '$%.2f' "$cost_usd")
+  duration_fmt=""
+  if [ -n "$duration_ms" ]; then
+    duration_sec=$((duration_ms / 1000))
+    duration_fmt=" ($((duration_sec / 60))m$((duration_sec % 60))s)"
+  fi
+  usage_part="${usage_part:+${usage_part}  |  }${cost_fmt}${duration_fmt}"
+fi
+
+# --- Session: reasoning effort, fast mode, prompt cache efficiency, diff size ---
+effort_level=$(echo "$input" | jq -r '.effort.level // empty')
+fast_mode_on=$(echo "$input" | jq -r 'if .fast_mode then "1" else empty end')
+cache_hit_ratio=$(echo "$input" | jq -r '.prompt_cache.hit_ratio // empty')
+cache_warm=$(echo "$input" | jq -r 'if .prompt_cache.warm then "1" else empty end')
+lines_added=$(echo "$input" | jq -r '.cost.total_lines_added // empty')
+lines_removed=$(echo "$input" | jq -r '.cost.total_lines_removed // empty')
+
+session_part=""
+[ -n "$effort_level" ] && session_part="effort:${effort_level}"
+[ -n "$fast_mode_on" ] && session_part="${session_part:+${session_part}  }⚡fast"
+if [ -n "$cache_hit_ratio" ]; then
+  cache_pct=$(awk -v r="$cache_hit_ratio" 'BEGIN { printf "%d", r * 100 }')
+  cache_state="cold"
+  [ -n "$cache_warm" ] && cache_state="warm"
+  session_part="${session_part:+${session_part}  }cache:${cache_pct}%(${cache_state})"
+fi
+if [ -n "$lines_added" ] || [ -n "$lines_removed" ]; then
+  session_part="${session_part:+${session_part}  }+${lines_added:-0}/-${lines_removed:-0}"
+fi
+
+# --- daily.dev headlines (second line, plugin-managed) ---
+daily_dev_plugin_dir="$HOME/.claude/plugins/cache/daily-dev/daily-dev"
+daily_dev_line=""
+if [ -d "$daily_dev_plugin_dir" ] && command -v node >/dev/null 2>&1; then
+  daily_dev_script_dir=$(command ls -td "$daily_dev_plugin_dir"/*/ 2>/dev/null | head -1)
+  if [ -n "$daily_dev_script_dir" ] && [ -f "${daily_dev_script_dir}statusline/statusline.mjs" ]; then
+    # Strip model to avoid duplicating it (already shown on the first line)
+    daily_dev_input=$(printf '%s' "$input" | jq -c 'del(.model)')
+    daily_dev_line=$(printf '%s' "$daily_dev_input" | node "${daily_dev_script_dir}statusline/statusline.mjs" 2>/dev/null)
+  fi
+fi
+
+output="$parts"
+[ -n "$usage_part" ] && output="${output}
+${usage_part}"
+[ -n "$session_part" ] && output="${output}
+${session_part}"
+[ -n "$daily_dev_line" ] && output="${output}
+${daily_dev_line}"
+
+printf '%s' "$output"
