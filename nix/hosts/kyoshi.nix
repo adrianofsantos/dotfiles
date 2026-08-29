@@ -35,6 +35,7 @@
       "/Applications/Brave Browser.app"
       "/Applications/Warp.app"
       "/Applications/Obsidian.app"
+      "/Applications/Ghostty.app"
       "/Applications/qbittorrent.app"
       "/Applications/Telegram.app"
       "/Applications/WhatsApp.app"

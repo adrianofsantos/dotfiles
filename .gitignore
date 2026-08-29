@@ -54,3 +54,6 @@ id_ed25519
 
 # Nix build output (dr-build / dr-review)
 result
+
+# Claude Code worktree sessions (claude --worktree)
+.claude/worktrees/
