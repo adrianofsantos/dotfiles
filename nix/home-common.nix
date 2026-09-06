@@ -122,7 +122,7 @@ in
           sudo darwin-rebuild build --flake ~/repos/github/dotfiles/nix/ || return 1
           echo
           echo "--- darwin-changes ---"
-          bat --paging=never result/darwin-changes
+          bat result/darwin-changes
           echo
           echo "--- diff-closures (geração ativa -> result) ---"
           nix store diff-closures /run/current-system ./result
