@@ -24,7 +24,8 @@
       "xcodegen"
     ];
     masApps = {
-      "Xcode" = 497799835;
+      "Xcode"       = 497799835;
+      "Windows App" = 1295203466;
     };
     taps = [
     ];
