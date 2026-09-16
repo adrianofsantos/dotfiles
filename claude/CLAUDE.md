@@ -19,6 +19,7 @@ SRE/DevOps sênior, 15+ anos. Stack principal: AWS, GCP, Azure, EKS/AKS, Terrafo
 ## Workflow
 - Features e mudanças não triviais: seguir PRD → Spec → Code (skill prd-spec-code-workflow). Não pular etapas, mesmo se eu pedir para "só codar logo": aplique ao menos a versão resumida.
 - Antes de editar: leia os arquivos relevantes. Nunca edite às cegas ou por suposição de estrutura.
+- Código novo ou alterado não trivial (lógica de negócio, correção de bug, fluxo com efeito colateral): inclua testes automatizados. O teste deve validar o comportamento esperado (contrato/especificação), nunca apenas espelhar a saída atual do código: um teste que só confirma o output de hoje esconde bugs em vez de pegá-los. Para correção de bug: o teste deve falhar contra o código anterior ao fix e passar depois. Se o projeto não tiver infraestrutura de testes ainda, proponha criá-la (framework, comando, onde roda) como parte da mudança.
 - Depois de editar: rode a skill verify (lint, testes, plan) quando aplicável. Não declare concluído sem verificar.
 - Terraform/OpenTofu: sempre `plan` antes de qualquer proposta de `apply`. Nunca `apply` por conta própria.
 - Kubernetes: prefira `--dry-run=server` e `kubectl diff` antes de propor mudanças.
