@@ -32,7 +32,7 @@
       "openmtp"
       "raycast"
       "visual-studio-code"
-      "warp"
+      "zed"
     ];
     brews = [
       "bpytop"

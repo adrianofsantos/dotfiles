@@ -19,7 +19,7 @@
 
   system.defaults.dock.persistent-apps = [
     "/Applications/Brave Browser.app"
-    "/Applications/Warp.app"
+    "/Applications/Ghostty.app"
     "/Applications/Obsidian.app"
     "/Applications/Telegram.app"
     "/Applications/WhatsApp.app"
