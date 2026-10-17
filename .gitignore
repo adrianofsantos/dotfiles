@@ -39,6 +39,8 @@ Temporary Items
 
 # Raycast
 raycast/extensions/*
+raycast/node-compile-cache/
+raycast/aster-endpoint.json
 
 # Segurança do repositorio
 *.pem
