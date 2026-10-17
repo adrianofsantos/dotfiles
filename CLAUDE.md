@@ -56,6 +56,7 @@ nix/
 - `dr` upgrading ~20 casks/masApps costuma passar dos 5 min default do `sudo` `timestamp_timeout`, causando pedidos repetidos de senha (às vezes com Touch ID falhando e caindo para senha manual). Corrigido via `security.sudo.extraConfig` (`timestamp_timeout=15`) em `macos-defaults.nix`
 - `timestamp_timeout=15` só evita prompt repetido dentro do **mesmo terminal**: o default do sudo (`man 5 sudoers`) pra `timestamp_type` é `tty`, cache por terminal + session id, não só por tempo. Rodar `dr` em panes/abas diferentes (ex: herdr, tmux) pede senha de novo mesmo dentro da janela de 15 min. Pra cache único entre todas as sessões do usuário: `Defaults timestamp_type=global` no mesmo `security.sudo.extraConfig` — trade-off: reduz isolamento por terminal
 - Pacote muito recente para estar no nixpkgs pinado (`nix search github:NixOS/nixpkgs/nixpkgs-26.05-darwin <pacote>` não retorna nada): preferir Homebrew formula em `brews` a manter um flake input de terceiro — evita overhead de pin próprio sem necessidade real
+- Antes de gerar completion de shell manualmente pra um binário instalado via cask, checar `brew info --cask <nome>`: muitos casks (ex: zed) já têm artefato "(Generated Completion)" e colocam o arquivo em `$(brew --prefix)/share/zsh/site-functions`, que já está no `$fpath` padrão, sem config nenhuma. Só vale gerar via Nix/activation script quando o cask não faz isso (caso do `docker-desktop`, que só empacota o completion estático dentro do `.app`, nunca exposto no `$fpath`)
 
 ## Decisões arquiteturais
 
@@ -118,6 +119,7 @@ nix/
 - Arquivos gerenciados via `mkOutOfStoreSymlink` apontando para o repositório git usam `force = true`: a fonte de verdade está no git, não há nada a preservar no arquivo avulso.
 - `backupCommand` está configurado globalmente no `flake.nix` para ambos os hosts: arquivos com `force = false` que colidiriam são renomeados para `.bak` e uma linha é impressa no terminal durante o `dr`. Arquivos com `force = true` sobrescrevem diretamente sem backup.
 - `programs.zsh.syntaxHighlighting` é submodule, não bool: `enable`, `package`, `highlighters`, `patterns` (`ZSH_HIGHLIGHT_PATTERNS`, glob literal por comando), `styles` (`ZSH_HIGHLIGHT_STYLES`, ex: `styles.path = "fg=#89b4fa,underline"`). Estilo default do highlighter `main` pra path válido é só `underline`, sem cor
+- `home.activation.<nome> = lib.hm.dag.entryAfter [...] "..."` roda shell script no `dr`. Helpers reais disponíveis (verificados em `lib/bash/home-manager.sh` do home-manager pinado): `run <cmd>` (já trata dry-run internamente, fazendo `echo "$@"` em vez de executar) e `_i "msg"` (log). Cuidado: `run <cmd> > arquivo` quebra em dry-run, porque o `echo` do `run` também é capturado pelo redirect, escrevendo o texto do comando dentro do arquivo em vez de nada. Pra scripts que redirecionam output, checar `[[ -v DRY_RUN ]]` explicitamente antes, não depender do `run`. Exemplo: `home.activation.dockerCompletions` em `home-kyoshi.nix`
 
 ## home-manager — Gotchas
 
@@ -125,6 +127,7 @@ nix/
 - Arquivos `.bak` gerados pelo `backupCommand` podem ser removidos com segurança após confirmar que o `dr` criou o symlink corretamente
 - `programs.git.hooks` seta `core.hooksPath` **globalmente** (`~/.config/git/config`), valendo pra todo repo na máquina, não só o repo declarante. Pra escopar a um repo específico, usar `programs.git.includes` com `condition = "gitdir:<path>"` e `contents.core.hooksPath` apontando pro hook
 - `programs.zsh.initContent` do usuário (valor sem wrapper) renderiza em `mkOrder 1000`; `shellAliases` vira `alias ...` só depois, em `mkOrder 1100` (conferido no source do home-manager pinado). Uma `function` declarada no `initContent` não pode chamar um alias pelo nome: o zsh expande aliases no *parse* da function, não a cada chamada, então o alias ainda não existe e a function fica travada chamando um comando inexistente (testado: `command not found`). Repetir o comando raw dentro da function, não depender do alias.
+- Antes de symlinkar o diretório de config de um app **por inteiro** (`xdg.configFile."app" = { source = mkOutOfStoreSymlink ...; }`, não um arquivo único), verificar se o app grava cache ou estado de runtime lá dentro. Achado em 2026-10: `raycast/node-compile-cache/` (bytecode V8 do Node, chave por versão/arch) e `raycast/aster-endpoint.json` (token de IPC local) foram commitados por engano junto com config real, o segundo chegou a vazar publicamente no GitHub (purgado via `git filter-repo`, ver `.gitignore`). Adicionar esses caminhos ao `.gitignore` **antes** do primeiro commit do diretório, não depois
 
 ## README — bootstrap
 
