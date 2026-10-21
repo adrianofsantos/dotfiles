@@ -38,9 +38,11 @@
       "bpytop"
       "gh"
       "herdr"
-      "pinentry-mac"
-      "watch"
       "mas"
+      "ncdu"
+      "pinentry-mac"
+      "rclone"
+      "watch"
     ];
     onActivation = {
       cleanup = "zap";
