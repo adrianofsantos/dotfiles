@@ -17,7 +17,6 @@
       "veracrypt-fuse-t"
     ];
     brews = [
-      "gemini-cli"
       "irssi"
       "opentofu"
       "talhelper"
