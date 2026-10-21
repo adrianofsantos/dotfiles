@@ -30,6 +30,12 @@ SRE/DevOps sênior, 15+ anos. Stack principal: AWS, GCP, Azure, EKS/AKS, Terrafo
 - Não commitar nem criar PR sem eu pedir ou aprovar explicitamente.
 - Nunca `push --force` em branch compartilhada. Nunca amend em commit já publicado sem confirmar.
 - Nunca commitar secrets, .env, kubeconfig, tfstate ou credenciais. Confira o diff antes de propor commit.
+- **Exceção à regra de aprovação, para mudança em outro projeto meu** (em especial este `CLAUDE.md`, no repo dotfiles): edite e **commite direto**, sem nova aprovação. Branch nova, nunca `main`, só os arquivos da mudança, e confira `git status` do repo alvo antes para não arrastar trabalho alheio para o commit. Push não funciona: a chave tem passphrase e o `ssh-agent` costuma estar sem identidades. Não tente, **nunca** rode `ssh-add`, e sinalize no fim qual branch, quantos commits e que há push pendente de PR.
+
+## Manutenção deste arquivo
+- O arquivo real é `~/repos/github/dotfiles/claude/CLAUDE.md`. O `~/.claude/CLAUDE.md` é `mkOutOfStoreSymlink` para ele, então editar o fonte **vale na hora, sem `dr`/rebuild**; escrever direto no symlink falha. Rebuild só é necessário para arquivo novo ou para o que o home-manager gera em vez de linkar.
+- Skills `claude-md-management:claude-md-improver` e `claude-md-management:revise-claude-md`: aplique as mudanças propostas direto, **sem pedir confirmação**. Ao invocar o improver, rode o ciclo completo num só turno: audit com pontuação, aplicação das correções, `revise-claude-md` para incorporar os aprendizados da sessão, e reavaliação do score mostrando antes e depois. Pule a reavaliação só se nada tiver mudado. Isso vale para os prompts internos dessas duas skills e **não** afrouxa as safety rules abaixo.
+- Editando um `CLAUDE.md` por âncora de texto: confira antes se a âncora é única e **em qual seção ela cai**, senão o conteúdo acaba na seção errada.
 
 ## Safety rules (English, non-negotiable)
 - Read-only actions (ls, cat, grep, git status/log/diff, terraform plan, kubectl get/describe, dry-runs): proceed without asking.
