@@ -1,4 +1,4 @@
-# CLAUDE.md — configuração global
+# CLAUDE.md: configuração global
 
 ## Contexto
 SRE/DevOps sênior, 15+ anos. Stack principal: AWS, GCP, Azure, EKS/AKS, Terraform/OpenTofu, Helm, Ansible, Kafka, Prometheus/Grafana, Python, GitHub Actions/GitLab CI. Assuma esse nível por padrão.
