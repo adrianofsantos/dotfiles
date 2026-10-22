@@ -30,9 +30,10 @@ nix/
 │   ├── nix-settings.nix   # GC automático (7d), optimise, flakes
 │   └── rosetta.nix        # nix-homebrew com Rosetta 2
 ├── hosts/
-│   ├── aang.nix           # Dock + casks exclusivos (chatgpt, google-chrome)
+│   ├── aang.nix           # Dock + masApps exclusivos (iWork, GarageBand, iMovie); sem casks/brews próprios
 │   └── kyoshi.nix         # Dock + casks + brews exclusivos (docker, steam, homelab tools)
 ├── git-hooks/pre-commit   # gitleaks, ver seção "Segurança"
+├── user.nix               # dados pessoais, criptografado com git-crypt (template: user.nix.example)
 ├── home-common.nix        # Base home-manager: shell, git, neovim, starship, atuin, claude configs
 ├── home-aang.nix          # imports home-common (sem lazydocker, sem docker completions)
 └── home-kyoshi.nix        # imports home-common + lazydocker + docker completions
@@ -113,6 +114,7 @@ nix/
 - Hífen em nome de pacote (`nerd-fonts.hack`, `nix-output-monitor`, `pytest-cov`) resolve normalmente sob `with pkgs;`: hífen é caractere válido em identificador Nix. `pkgs."nome"` com aspas só é necessário se o nome não for um identificador válido por outro motivo (ex: começa com dígito, contém `@`/`/`)
 - Para checar o default real de uma opção nix-darwin antes de alterá-la: `nix eval ~/repos/github/dotfiles/nix#darwinConfigurations.<Host>.options.<caminho>.default`. Para opções `extraConfig` (texto bruto, ex: `security.sudo.extraConfig`), esse default é sempre `null`: o comportamento real vem da ferramenta subjacente (ex: `man 5 sudoers` para `timestamp_timeout`, 5 min por default)
 - `nix flake check` não força avaliação de todo `config` (é lazy): erro de sintaxe numa lista/atributo (ex: vírgula sobrando em `fonts.packages`) pode passar despercebido. Pra forçar: `nix eval .#darwinConfigurations.<Host>.config.<caminho>`
+- `nix eval --raw` de um valor do tipo path (ex: `...home-manager.users.<user>.programs.git.hooks.pre-commit`) devolve o store path **sem** criá-lo no disco: `cat` dá "No such file". `nix-store --realise <path>` antes de ler, pra conferir o que o `dr` vai instalar
 - Pra achar o arquivo fonte que define um pacote/atributo do nixpkgs (confirmar nome/existência antes de usar): `nix eval .#darwinConfigurations.<Host>.pkgs.<atributo>.meta.position` retorna `<store-path>/pkgs/.../default.nix:<linha>`, já baixado em `/nix/store`: dá pra `cat`/`ls` direto. Alternativa interativa: `nix repl`, `:lf .`, TAB-complete em `darwinConfigurations.<Host>.pkgs.<prefixo>`
 - `ls` é alias para `eza --icons` neste ambiente (zsh). `eza -d` com glob de trailing slash (`ls -td dir/*/`) ignora `-d` e lista o conteúdo do diretório em vez do diretório em si: quebra silenciosamente ao testar comandos interativamente via shell. Scripts `#!/usr/bin/env bash` não são afetados (não carregam `.zshrc`), mas testes interativos devem usar `command ls` para reproduzir o comportamento real do script
 
