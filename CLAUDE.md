@@ -7,10 +7,11 @@ Dois hosts Apple Silicon: **Aang** (MacBook Air, uso secundário) e **Kyoshi** (
 
 ```
 .
-├── nix/            # nix-darwin + home-manager — ver "Estrutura dos módulos Nix" abaixo
-├── claude/         # fonte de verdade do Claude Code (CLAUDE.md global, skills, settings.json, statusline) — symlink direto via home-common.nix
-├── nvim/           # config Neovim/LazyVim — symlink via mkOutOfStoreSymlink, requer `dr` pra ter efeito
-├── bpytop/         # config bpytop — symlink via mkOutOfStoreSymlink
+├── nix/            # nix-darwin + home-manager: ver "Estrutura dos módulos Nix" abaixo
+├── claude/         # fonte de verdade do Claude Code (CLAUDE.md global, skills, settings.json, statusline): symlink direto via home-common.nix
+├── nvim/           # config Neovim/LazyVim: symlink via mkOutOfStoreSymlink, requer `dr` pra ter efeito
+├── bpytop/         # config bpytop: symlink via mkOutOfStoreSymlink
+├── ghostty/        # config do Ghostty: symlink via mkOutOfStoreSymlink, ver seção "Ghostty"
 ├── raycast/        # extensions/scripts do Raycast
 ├── bat/themes/     # tema custom do bat
 ├── starship.toml   # prompt do shell
@@ -31,6 +32,7 @@ nix/
 ├── hosts/
 │   ├── aang.nix           # Dock + casks exclusivos (chatgpt, google-chrome)
 │   └── kyoshi.nix         # Dock + casks + brews exclusivos (docker, steam, homelab tools)
+├── git-hooks/pre-commit   # gitleaks, ver seção "Segurança"
 ├── home-common.nix        # Base home-manager: shell, git, neovim, starship, atuin, claude configs
 ├── home-aang.nix          # imports home-common (sem lazydocker, sem docker completions)
 └── home-kyoshi.nix        # imports home-common + lazydocker + docker completions
@@ -38,82 +40,83 @@ nix/
 
 ## Convenções
 
-- Listas Homebrew (`casks`, `brews`) são **mergeadas automaticamente** pelo módulo system — cada módulo só declara o seu incremento, sem repetir o que já está no common
+- Listas Homebrew (`casks`, `brews`) são **mergeadas automaticamente** pelo módulo system: cada módulo só declara o seu incremento, sem repetir o que já está no common
 - Valores compartilhados entre os dois hosts em `flake.nix` são extraídos para o bloco `let` como variáveis nomeadas (ex: `hmBackupCommand`)
-- `nixpkgs.hostPlatform = "aarch64-darwin"` está em `common.nix` — vale para ambos os hosts
+- `nixpkgs.hostPlatform = "aarch64-darwin"` está em `common.nix`: vale para ambos os hosts
 - `specialArgs = { inherit self user; }` passa `self.rev` e dados do usuário aos módulos do sistema
 - `extraSpecialArgs = { inherit user; }` passa os mesmos dados aos módulos do home-manager
-- Dados pessoais (username, email, gpgKey, paths) estão centralizados em `user.nix` — único arquivo a editar ao fazer fork
+- Dados pessoais (username, email, gpgKey, paths) estão centralizados em `user.nix`: único arquivo a editar ao fazer fork
 - `home-manager` usa `lib.mkAfter` para concatenar `initContent` de zsh entre módulos
-- ProtonVPN e ProtonDrive usam Login Items nativos do macOS — sem LaunchAgents ou módulos adicionais. `NSAppSleepDisabled` via activation script **não** resolve ícones duplicados no Aang e foi removido.
-- Causa raiz da duplicação de processos do Proton (VPN e Drive) após login: o antigo `proton.nix` (removido em `51d95fc`) gravava `~/Library/LaunchAgents/ch.protonvpn.mac.plist` e `~/Library/LaunchAgents/me.proton.drive.plist` diretamente no disco. Remover o módulo do Nix não desfaz esses arquivos — eles continuam carregados pelo `launchd` e disputam com o Login Item nativo do macOS, gerando duas instâncias do mesmo app. Se voltar a acontecer em qualquer máquina, verificar `ls ~/Library/LaunchAgents/ | grep -i proton`; se existir, `launchctl bootout gui/$(id -u)/<label>` e remover o plist.
+- ProtonVPN e ProtonDrive usam Login Items nativos do macOS: sem LaunchAgents ou módulos adicionais. `NSAppSleepDisabled` via activation script **não** resolve ícones duplicados no Aang e foi removido.
+- Causa raiz da duplicação de processos do Proton (VPN e Drive) após login: o antigo `proton.nix` (removido em `51d95fc`) gravava `~/Library/LaunchAgents/ch.protonvpn.mac.plist` e `~/Library/LaunchAgents/me.proton.drive.plist` diretamente no disco. Remover o módulo do Nix não desfaz esses arquivos: eles continuam carregados pelo `launchd` e disputam com o Login Item nativo do macOS, gerando duas instâncias do mesmo app. Se voltar a acontecer em qualquer máquina, verificar `ls ~/Library/LaunchAgents/ | grep -i proton`; se existir, `launchctl bootout gui/$(id -u)/<label>` e remover o plist.
 
-## Homebrew — Gotchas
+## Homebrew: Gotchas
 
-- `homebrew.onActivation.autoUpdate` **deve permanecer `false`** — definir como `true` permite que o `brew bundle` dispare um auto-update interno que corrompe a detecção do `mas`, causando `mas installation failed` mesmo com o app já instalado. Com `autoUpdate = false`, o nix-darwin passa `HOMEBREW_NO_AUTO_UPDATE=1` ao chamar `brew bundle`
-- `homebrew.onActivation.cleanup = "zap"` remove **qualquer** pacote brew não declarado em nenhum módulo no próximo `dr` — se instalar algo manualmente com `brew install`, declarar no módulo correspondente ou será desinstalado
-- `brew cleanup` pode falhar com `Error: No such file or directory @ dir_s_rmdir` durante o `brew bundle` do `dr` — race condition cosmética no cache do Homebrew, não indica falha do upgrade (que já terminou antes do cleanup rodar). Seguro ignorar
+- `homebrew.onActivation.autoUpdate` **deve permanecer `false`**: definir como `true` permite que o `brew bundle` dispare um auto-update interno que corrompe a detecção do `mas`, causando `mas installation failed` mesmo com o app já instalado. Com `autoUpdate = false`, o nix-darwin passa `HOMEBREW_NO_AUTO_UPDATE=1` ao chamar `brew bundle`
+- `homebrew.onActivation.cleanup = "zap"` remove **qualquer** pacote brew não declarado em nenhum módulo no próximo `dr`: se instalar algo manualmente com `brew install`, declarar no módulo correspondente ou será desinstalado
+- `brew cleanup` pode falhar com `Error: No such file or directory @ dir_s_rmdir` durante o `brew bundle` do `dr`: race condition cosmética no cache do Homebrew, não indica falha do upgrade (que já terminou antes do cleanup rodar). Seguro ignorar
 - `dr` upgrading ~20 casks/masApps costuma passar dos 5 min default do `sudo` `timestamp_timeout`, causando pedidos repetidos de senha (às vezes com Touch ID falhando e caindo para senha manual). Corrigido via `security.sudo.extraConfig` (`timestamp_timeout=15`) em `macos-defaults.nix`
-- `timestamp_timeout=15` só evita prompt repetido dentro do **mesmo terminal**: o default do sudo (`man 5 sudoers`) pra `timestamp_type` é `tty`, cache por terminal + session id, não só por tempo. Rodar `dr` em panes/abas diferentes (ex: herdr, tmux) pede senha de novo mesmo dentro da janela de 15 min. Pra cache único entre todas as sessões do usuário: `Defaults timestamp_type=global` no mesmo `security.sudo.extraConfig` — trade-off: reduz isolamento por terminal
-- Pacote muito recente para estar no nixpkgs pinado (`nix search github:NixOS/nixpkgs/nixpkgs-26.05-darwin <pacote>` não retorna nada): preferir Homebrew formula em `brews` a manter um flake input de terceiro — evita overhead de pin próprio sem necessidade real
+- `timestamp_timeout=15` só evita prompt repetido dentro do **mesmo terminal**: o default do sudo (`man 5 sudoers`) pra `timestamp_type` é `tty`, cache por terminal + session id, não só por tempo. Rodar `dr` em panes/abas diferentes (ex: herdr, tmux) pede senha de novo mesmo dentro da janela de 15 min. Pra cache único entre todas as sessões do usuário: `Defaults timestamp_type=global` no mesmo `security.sudo.extraConfig`. Trade-off: reduz isolamento por terminal
+- Pacote muito recente para estar no nixpkgs pinado (`nix search github:NixOS/nixpkgs/nixpkgs-26.05-darwin <pacote>` não retorna nada): preferir Homebrew formula em `brews` a manter um flake input de terceiro, o que evita overhead de pin próprio sem necessidade real
 - Antes de gerar completion de shell manualmente pra um binário instalado via cask, checar `brew info --cask <nome>`: muitos casks (ex: zed) já têm artefato "(Generated Completion)" e colocam o arquivo em `$(brew --prefix)/share/zsh/site-functions`, que já está no `$fpath` padrão, sem config nenhuma. Só vale gerar via Nix/activation script quando o cask não faz isso (caso do `docker-desktop`, que só empacota o completion estático dentro do `.app`, nunca exposto no `$fpath`)
 
 ## Decisões arquiteturais
 
 - **Aang é enxuto**: sem container runtime (Docker/Podman), sem ferramentas pesadas. CLIs de gerenciamento (talosctl, kubectx) são mantidas pois não consomem recursos em idle
 - **Kyoshi tem Docker Desktop**: não Podman. Docker Desktop expõe o socket padrão que os MCP servers esperam
-- **home-common.nix** contém toda a config compartilhada — hosts só declaram divergências
+- **home-common.nix** contém toda a config compartilhada: hosts só declaram divergências
 - **fuse-t** permanece no `personal.nix` pois o Cryptomator depende dele para montar volumes no macOS
 
 ## Claude Code
 
-- `claude/CLAUDE.md`, cada skill em `claude/skills/<nome>/SKILL.md`, `claude/settings.json` e `claude/statusline-command.sh` têm um `home.file` individual no `home-common.nix` via `mkOutOfStoreSymlink` — alterações nos arquivos fonte têm efeito imediato sem `dr`
-- `claude/CLAUDE.md` é o global CLAUDE.md (`~/.claude/CLAUDE.md`) — preferências verdadeiramente globais (persona, idioma, comunicação, git, safety rules), carregado sempre em toda conversa/projeto. Editado com frequência direto pelo usuário fora de PR — conferir o arquivo em vez de assumir conteúdo específico
-- `claude/skills/prd-spec-code-workflow/SKILL.md` é o workflow Pesquisa→Spec→Code (`~/.claude/skills/prd-spec-code-workflow/SKILL.md`) — carrega sob demanda quando o pedido do usuário bate com a `description` da skill (novo módulo, PRD/spec, mudança de contrato), não em toda conversa. Extraído do CLAUDE.md global para economizar tokens em tarefas triviais; trade-off: ativação depende de matching semântico, não é garantida
+- `claude/CLAUDE.md`, cada skill em `claude/skills/<nome>/SKILL.md`, `claude/settings.json` e `claude/statusline-command.sh` têm um `home.file` individual no `home-common.nix` via `mkOutOfStoreSymlink`: alterações nos arquivos fonte têm efeito imediato sem `dr`
+- `claude/CLAUDE.md` é o global CLAUDE.md (`~/.claude/CLAUDE.md`): preferências verdadeiramente globais (persona, idioma, comunicação, git, safety rules), carregado sempre em toda conversa/projeto. Editado com frequência direto pelo usuário fora de PR, então conferir o arquivo em vez de assumir conteúdo específico
+- `claude/skills/prd-spec-code-workflow/SKILL.md` é o workflow Pesquisa→Spec→Code (`~/.claude/skills/prd-spec-code-workflow/SKILL.md`): carrega sob demanda quando o pedido do usuário bate com a `description` da skill (novo módulo, PRD/spec, mudança de contrato), não em toda conversa. Extraído do CLAUDE.md global para economizar tokens em tarefas triviais; trade-off: ativação depende de matching semântico, não é garantida
 - Nova skill pessoal: arquivo em `claude/skills/<nome>/SKILL.md` + `home.file` correspondente em `home-common.nix` (mesmo padrão `mkOutOfStoreSymlink` + `force = true` do `claude/CLAUDE.md`)
-- `claude/settings.json` e `claude/statusline-command.sh` são públicos no repositório — não incluir tokens, chaves ou dados pessoais nesses arquivos
+- `claude/settings.json` e `claude/statusline-command.sh` são públicos no repositório: não incluir tokens, chaves ou dados pessoais nesses arquivos
 - Após bootstrap: rodar `claude` para autenticar via browser antes de usar
 - Plugins em `~/.claude/plugins/installed_plugins.json` com `"scope": "project"` presos a um `projectPath` que não bate com o diretório atual não carregam, mesmo com `enabledPlugins: true` no `settings.json`. Corrigir via `/plugin` (reinstalar como `user` scope, igual ao plugin `warp`) e rodar `/reload-plugins` para aplicar
 - Testar `claude/statusline-command.sh` localmente sem sessão real: `echo '{"workspace":{"current_dir":"..."},"model":{"display_name":"..."}}' | bash claude/statusline-command.sh`. Campos ausentes no JSON devem degradar graciosamente (a maioria dos campos do schema do Claude Code, como `rate_limits` e `prompt_cache`, só aparece depois da primeira resposta da API ou para contas Pro/Max)
 
 ## Ghostty
 
-- Config real do Ghostty no macOS: `~/Library/Application Support/com.mitchellh.ghostty/config` (não `~/.config/ghostty/config`). Gerenciado via `home.file."Library/Application Support/com.mitchellh.ghostty/config"` em `home-common.nix`, mesmo padrão `mkOutOfStoreSymlink` + `force = true` dos outros arquivos out-of-store — efeito imediato, sem precisar de `dr`
+- Config real do Ghostty no macOS: `~/Library/Application Support/com.mitchellh.ghostty/config` (não `~/.config/ghostty/config`). Gerenciado via `home.file."Library/Application Support/com.mitchellh.ghostty/config"` em `home-common.nix`, mesmo padrão `mkOutOfStoreSymlink` + `force = true` dos outros arquivos out-of-store: efeito imediato, sem precisar de `dr`
 - Diagnóstico: `ghostty +show-config` (config efetivo já mergeado), `ghostty +list-fonts`, `ghostty +list-themes`
 - Fontes bitmap (ex: ProggyClean) são desenhadas pixel-perfect só no tamanho nativo (~13px); escalar pra outro tamanho sempre borra, não tem ajuste de config que resolva mantendo a mesma fonte
 
 ## Segurança
 
-- Hook de pre-commit (gitleaks, bloqueia commits com secrets) é declarativo via `programs.git.hooks.pre-commit` em `home-common.nix`, apontando pra `nix/git-hooks/pre-commit`. Aplicado globalmente (`core.hooksPath` em `~/.config/git/config`, vale pra todo repo na máquina) no próximo `dr` — sem passo manual de bootstrap
-- Diferente de `claude/CLAUDE.md`/`nvim/` (symlink direto ou via `mkOutOfStoreSymlink`), `programs.git.hooks` copia o arquivo pro Nix store na avaliação — editar `nix/git-hooks/pre-commit` exige `dr` pra ter efeito, não é instantâneo
-- `nix/user.nix` está criptografado com git-crypt — ao clonar em máquina nova rodar `git-crypt unlock` após configurar a chave GPG
+- Hook de pre-commit (gitleaks, bloqueia commits com secrets) é declarativo via `programs.git.hooks.pre-commit` em `home-common.nix`, apontando pra `nix/git-hooks/pre-commit`. Aplicado globalmente (`core.hooksPath` em `~/.config/git/config`, vale pra todo repo na máquina) no próximo `dr`: sem passo manual de bootstrap
+- Diferente de `claude/CLAUDE.md`/`nvim/` (symlink direto ou via `mkOutOfStoreSymlink`), `programs.git.hooks` copia o arquivo pro Nix store na avaliação: editar `nix/git-hooks/pre-commit` exige `dr` pra ter efeito, não é instantâneo
+- Validar commits já feitos (o hook só pega o que passa por ele, ex: commit de outra sessão): `gitleaks git --log-opts="main..HEAD" --no-banner`
+- `nix/user.nix` está criptografado com git-crypt: ao clonar em máquina nova rodar `git-crypt unlock` após configurar a chave GPG
 - Antes de `git-crypt add-gpg-user`, definir confiança GPG: `gpg --fingerprint --with-colons <KEY_ID> | awk -F: '/^fpr/{print $10":6:"}' | gpg --import-ownertrust`
-- `nix/user.nix.example` existe como template público — `user.nix` real nunca aparece em plaintext no repositório remoto
+- `nix/user.nix.example` existe como template público: `user.nix` real nunca aparece em plaintext no repositório remoto
 
 ## GPG / Commit Signing
 
-- `pinentry-mac` via brew (em `common.nix` → `homebrew.brews`) — não nixpkgs
+- `pinentry-mac` via brew (em `common.nix` → `homebrew.brews`): não nixpkgs
 - `~/.gnupg/gpg-agent.conf` gerenciado manualmente (não via home-manager) com `pinentry-program /opt/homebrew/bin/pinentry-mac`
 - Sem pinentry: `git commit` falha com `gpg: signing failed: No pinentry`
 - Após alterar gpg-agent: logout/login obrigatório (agente antigo continua na sessão)
-- Se `gpg-agent.conf` estiver ausente (não só desatualizado), recriar o arquivo e rodar `gpgconf --kill gpg-agent` resolve sem logout/login — o agente sobe de novo sob demanda já lendo a config nova
+- Se `gpg-agent.conf` estiver ausente (não só desatualizado), recriar o arquivo e rodar `gpgconf --kill gpg-agent` resolve sem logout/login: o agente sobe de novo sob demanda já lendo a config nova
 
 ## Git / SSH
 
 - Após logout/reboot, o `ssh-agent` perde as identidades carregadas (`ssh-add -l` → "The agent has no identities"), bloqueando `git push`/`gh` sobre SSH até rodar `ssh-add ~/.ssh/id_ed25519` (pede a passphrase)
 
-## Nix — Gotchas
+## Nix: Gotchas
 
 - `nix search nixpkgs` busca no registry global (geralmente unstable), não na versão pinada do flake. Usar: `nix search github:NixOS/nixpkgs/nixpkgs-26.05-darwin <pacote>`
-- Pra checar se uma opção de módulo existe/funciona na versão pinada (ex: `home-manager`), puxar o source direto do rev do `flake.lock`: `curl -s https://raw.githubusercontent.com/nix-community/home-manager/<rev>/modules/programs/<módulo>.nix`. Se `curl`/`WebFetch` pra `raw.githubusercontent.com` ou `github.com/blob/...` falhar (rede bloqueia, retorna vazio/404): `nix flake metadata "github:nix-community/home-manager/<rev>" --json` retorna o `path` do source já baixado em `/nix/store` — dá pra `grep`/`cat` direto, sem depender de rede externa. `api.github.com` (contents/search API) via WebFetch costuma funcionar mesmo quando `raw.githubusercontent.com` não funciona
-- Módulos com `settings` livre (ex: `programs.atuin.settings`, TOML sem schema no Nix) não são validados pelo `nix flake check` — uma chave inexistente só falha em runtime da ferramenta, ou nem falha. Conferir contra o fonte/docs da ferramenta na versão pinada do nixpkgs antes de escrever, não assumir nomes "prováveis"
-- Hífen em nome de pacote (`nerd-fonts.hack`, `nix-output-monitor`, `pytest-cov`) resolve normalmente sob `with pkgs;` — hífen é caractere válido em identificador Nix. `pkgs."nome"` com aspas só é necessário se o nome não for um identificador válido por outro motivo (ex: começa com dígito, contém `@`/`/`)
-- Para checar o default real de uma opção nix-darwin antes de alterá-la: `nix eval ~/repos/github/dotfiles/nix#darwinConfigurations.<Host>.options.<caminho>.default`. Para opções `extraConfig` (texto bruto, ex: `security.sudo.extraConfig`), esse default é sempre `null` — o comportamento real vem da ferramenta subjacente (ex: `man 5 sudoers` para `timestamp_timeout`, 5 min por default)
-- `nix flake check` não força avaliação de todo `config` (é lazy) — erro de sintaxe numa lista/atributo (ex: vírgula sobrando em `fonts.packages`) pode passar despercebido. Pra forçar: `nix eval .#darwinConfigurations.<Host>.config.<caminho>`
-- Pra achar o arquivo fonte que define um pacote/atributo do nixpkgs (confirmar nome/existência antes de usar): `nix eval .#darwinConfigurations.<Host>.pkgs.<atributo>.meta.position` retorna `<store-path>/pkgs/.../default.nix:<linha>`, já baixado em `/nix/store` — dá pra `cat`/`ls` direto. Alternativa interativa: `nix repl`, `:lf .`, TAB-complete em `darwinConfigurations.<Host>.pkgs.<prefixo>`
-- `ls` é alias para `eza --icons` neste ambiente (zsh). `eza -d` com glob de trailing slash (`ls -td dir/*/`) ignora `-d` e lista o conteúdo do diretório em vez do diretório em si — quebra silenciosamente ao testar comandos interativamente via shell. Scripts `#!/usr/bin/env bash` não são afetados (não carregam `.zshrc`), mas testes interativos devem usar `command ls` para reproduzir o comportamento real do script
+- Pra checar se uma opção de módulo existe/funciona na versão pinada (ex: `home-manager`), puxar o source direto do rev do `flake.lock`: `curl -s https://raw.githubusercontent.com/nix-community/home-manager/<rev>/modules/programs/<módulo>.nix`. Se `curl`/`WebFetch` pra `raw.githubusercontent.com` ou `github.com/blob/...` falhar (rede bloqueia, retorna vazio/404): `nix flake metadata "github:nix-community/home-manager/<rev>" --json` retorna o `path` do source já baixado em `/nix/store`: dá pra `grep`/`cat` direto, sem depender de rede externa. `api.github.com` (contents/search API) via WebFetch costuma funcionar mesmo quando `raw.githubusercontent.com` não funciona
+- Módulos com `settings` livre (ex: `programs.atuin.settings`, TOML sem schema no Nix) não são validados pelo `nix flake check`: uma chave inexistente só falha em runtime da ferramenta, ou nem falha. Conferir contra o fonte/docs da ferramenta na versão pinada do nixpkgs antes de escrever, não assumir nomes "prováveis"
+- Hífen em nome de pacote (`nerd-fonts.hack`, `nix-output-monitor`, `pytest-cov`) resolve normalmente sob `with pkgs;`: hífen é caractere válido em identificador Nix. `pkgs."nome"` com aspas só é necessário se o nome não for um identificador válido por outro motivo (ex: começa com dígito, contém `@`/`/`)
+- Para checar o default real de uma opção nix-darwin antes de alterá-la: `nix eval ~/repos/github/dotfiles/nix#darwinConfigurations.<Host>.options.<caminho>.default`. Para opções `extraConfig` (texto bruto, ex: `security.sudo.extraConfig`), esse default é sempre `null`: o comportamento real vem da ferramenta subjacente (ex: `man 5 sudoers` para `timestamp_timeout`, 5 min por default)
+- `nix flake check` não força avaliação de todo `config` (é lazy): erro de sintaxe numa lista/atributo (ex: vírgula sobrando em `fonts.packages`) pode passar despercebido. Pra forçar: `nix eval .#darwinConfigurations.<Host>.config.<caminho>`
+- Pra achar o arquivo fonte que define um pacote/atributo do nixpkgs (confirmar nome/existência antes de usar): `nix eval .#darwinConfigurations.<Host>.pkgs.<atributo>.meta.position` retorna `<store-path>/pkgs/.../default.nix:<linha>`, já baixado em `/nix/store`: dá pra `cat`/`ls` direto. Alternativa interativa: `nix repl`, `:lf .`, TAB-complete em `darwinConfigurations.<Host>.pkgs.<prefixo>`
+- `ls` é alias para `eza --icons` neste ambiente (zsh). `eza -d` com glob de trailing slash (`ls -td dir/*/`) ignora `-d` e lista o conteúdo do diretório em vez do diretório em si: quebra silenciosamente ao testar comandos interativamente via shell. Scripts `#!/usr/bin/env bash` não são afetados (não carregam `.zshrc`), mas testes interativos devem usar `command ls` para reproduzir o comportamento real do script
 
-## home-manager — Convenções
+## home-manager: Convenções
 
 - Todo `home.file` ou `xdg.configFile` deve declarar `force` explicitamente, mesmo que seja o valor default (`false`). Valores que diferem do default devem ser declarados sem exceção.
 - Arquivos gerenciados via `mkOutOfStoreSymlink` apontando para o repositório git usam `force = true`: a fonte de verdade está no git, não há nada a preservar no arquivo avulso.
@@ -121,7 +124,7 @@ nix/
 - `programs.zsh.syntaxHighlighting` é submodule, não bool: `enable`, `package`, `highlighters`, `patterns` (`ZSH_HIGHLIGHT_PATTERNS`, glob literal por comando), `styles` (`ZSH_HIGHLIGHT_STYLES`, ex: `styles.path = "fg=#89b4fa,underline"`). Estilo default do highlighter `main` pra path válido é só `underline`, sem cor
 - `home.activation.<nome> = lib.hm.dag.entryAfter [...] "..."` roda shell script no `dr`. Helpers reais disponíveis (verificados em `lib/bash/home-manager.sh` do home-manager pinado): `run <cmd>` (já trata dry-run internamente, fazendo `echo "$@"` em vez de executar) e `_i "msg"` (log). Cuidado: `run <cmd> > arquivo` quebra em dry-run, porque o `echo` do `run` também é capturado pelo redirect, escrevendo o texto do comando dentro do arquivo em vez de nada. Pra scripts que redirecionam output, checar `[[ -v DRY_RUN ]]` explicitamente antes, não depender do `run`. Exemplo: `home.activation.dockerCompletions` em `home-kyoshi.nix`
 
-## home-manager — Gotchas
+## home-manager: Gotchas
 
 - Se um arquivo já existe no sistema e o home-manager tenta gerenciá-lo sem `force = true` e sem `backupCommand` configurado, o rebuild falha com `would be clobbered`
 - Arquivos `.bak` gerados pelo `backupCommand` podem ser removidos com segurança após confirmar que o `dr` criou o symlink corretamente
@@ -129,16 +132,16 @@ nix/
 - `programs.zsh.initContent` do usuário (valor sem wrapper) renderiza em `mkOrder 1000`; `shellAliases` vira `alias ...` só depois, em `mkOrder 1100` (conferido no source do home-manager pinado). Uma `function` declarada no `initContent` não pode chamar um alias pelo nome: o zsh expande aliases no *parse* da function, não a cada chamada, então o alias ainda não existe e a function fica travada chamando um comando inexistente (testado: `command not found`). Repetir o comando raw dentro da function, não depender do alias.
 - Antes de symlinkar o diretório de config de um app **por inteiro** (`xdg.configFile."app" = { source = mkOutOfStoreSymlink ...; }`, não um arquivo único), verificar se o app grava cache ou estado de runtime lá dentro. Achado em 2026-10: `raycast/node-compile-cache/` (bytecode V8 do Node, chave por versão/arch) e `raycast/aster-endpoint.json` (token de IPC local) foram commitados por engano junto com config real, o segundo chegou a vazar publicamente no GitHub (purgado via `git filter-repo`, ver `.gitignore`). Adicionar esses caminhos ao `.gitignore` **antes** do primeiro commit do diretório, não depois
 
-## README — bootstrap
+## README: bootstrap
 
-- A seção "Setup em máquina nova" do README é o guia canônico de bootstrap — não remover nem enxugar; é a única documentação dos passos manuais pré-`dr`
+- A seção "Setup em máquina nova" do README é o guia canônico de bootstrap: não remover nem enxugar; é a única documentação dos passos manuais pré-`dr`
 
-## Neovim — Gotchas
+## Neovim: Gotchas
 
 - `nvim/` usa `mkOutOfStoreSymlink` mas a cadeia passa pelo Nix store: `~/.config/nvim` → store intermediário → `~/repos/github/dotfiles/nvim`. Alterações em `nvim/` requerem `dr` para efeito (diferente dos arquivos `claude/` que são symlinks diretos)
 - LazyVim com `install_version >= 8` (ver `~/.config/nvim/lazyvim.json`): picker padrão é **snacks.nvim**, não telescope. Explorer padrão é **snacks explorer**, não neo-tree. Configurar via `opts.picker.sources.files` e `opts.picker.sources.explorer`
 - No snacks picker, a opção para arquivos gitignored é `ignored = true` (não `no_ignore`); para dotfiles é `hidden = true`
-- Plugins custom estão em `nvim/lua/plugins/`: `catppuccin.lua` (tema), `editor.lua` (snacks picker overrides), `obsidian.lua` (vault Cryptomator). `example.lua` é o template upstream do LazyVim — manter sincronizado com https://github.com/LazyVim/starter
+- Plugins custom estão em `nvim/lua/plugins/`: `catppuccin.lua` (tema), `editor.lua` (snacks picker overrides), `obsidian.lua` (vault Cryptomator). `example.lua` é o template upstream do LazyVim: manter sincronizado com https://github.com/LazyVim/starter
 - `obsidian.nvim` não precisa de `telescope.nvim` como dependência no LazyVim v8+ (snacks picker é o padrão)
 
 ## Rebuild
@@ -152,12 +155,12 @@ dr-build   # alias para: sudo darwin-rebuild build --flake ~/repos/github/dotfil
 nix flake update --flake ~/repos/github/dotfiles/nix/
 ```
 
-`dr-build` builda sem ativar e deixa `./result` (out-link padrão do `nix build`; o script do darwin-rebuild só passa `--no-link` quando a ação não é `build`, então `dr`/`switch` nunca cria esse link). `result` está no `.gitignore`. `dr-review` (function em `home-common.nix`) builda, mostra `result/darwin-changes` e o diff de pacotes contra a geração ativa antes de você rodar `dr` de verdade — usar `nix store diff-closures /run/current-system ./result` (caminho explícito com `./`, `result` puro é lido como flake ref e falha).
+`dr-build` builda sem ativar e deixa `./result` (out-link padrão do `nix build`; o script do darwin-rebuild só passa `--no-link` quando a ação não é `build`, então `dr`/`switch` nunca cria esse link). `result` está no `.gitignore`. `dr-review` (function em `home-common.nix`) builda, mostra `result/darwin-changes` e o diff de pacotes contra a geração ativa antes de você rodar `dr` de verdade: usar `nix store diff-closures /run/current-system ./result` (caminho explícito com `./`, `result` puro é lido como flake ref e falha).
 
 ## Workflow de alterações
 
 Após qualquer modificação em arquivos `.nix`, executar `nix flake check ~/repos/github/dotfiles/nix/` antes de reportar a tarefa como concluída. Se o check falhar, corrigir antes de continuar.
 
-Ao iniciar um tópico novo que não deve se misturar com o trabalho em andamento na sessão atual, preferir abrir uma sessão separada com `claude --worktree <nome>` a stash/checkout no meio da sessão atual: cada sessão fica isolada em sua própria git worktree (`.claude/worktrees/<nome>/`, branch `worktree-<nome>`), sem risco de colisão de arquivo entre os dois tópicos. Adicionar `.claude/worktrees/` ao `.gitignore` do repo.
+Ao iniciar um tópico novo que não deve se misturar com o trabalho em andamento na sessão atual, preferir abrir uma sessão separada com `claude --worktree <nome>` a stash/checkout no meio da sessão atual: cada sessão fica isolada em sua própria git worktree (`.claude/worktrees/<nome>/`, branch `worktree-<nome>`), sem risco de colisão de arquivo entre os dois tópicos. `.claude/worktrees/` já está no `.gitignore` deste repo; em outro repo, adicionar antes do primeiro uso.
 
-Reservar o fluxo stash → `checkout main` → nova branch → `stash pop` para quando a mudança não relacionada já aconteceu sem querer no meio da sessão atual (ex: `nix/flake.lock` mudou sozinho) e precisa só ser separada antes de commitar — nesse caso não há como voltar pra uma worktree que não existia desde o início. Se só parte dos arquivos modificados pertence ao tópico, usar `git stash push -u -m "<msg>" -- <paths>` pra stashar só esses arquivos, deixando o resto intacto na branch atual.
+Reservar o fluxo stash → `checkout main` → nova branch → `stash pop` para quando a mudança não relacionada já aconteceu sem querer no meio da sessão atual (ex: `nix/flake.lock` mudou sozinho) e precisa só ser separada antes de commitar: nesse caso não há como voltar pra uma worktree que não existia desde o início. Se só parte dos arquivos modificados pertence ao tópico, usar `git stash push -u -m "<msg>" -- <paths>` pra stashar só esses arquivos, deixando o resto intacto na branch atual.
