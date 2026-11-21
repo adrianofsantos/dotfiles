@@ -31,7 +31,7 @@ nix/
 │   └── rosetta.nix        # nix-homebrew com Rosetta 2
 ├── hosts/
 │   ├── aang.nix           # Dock + masApps exclusivos (iWork, GarageBand, iMovie); sem casks/brews próprios
-│   └── kyoshi.nix         # Dock + casks + brews exclusivos (docker, steam, homelab tools)
+│   └── kyoshi.nix         # Dock + casks + brews + taps exclusivos (docker, sbx, steam, homelab tools)
 ├── git-hooks/pre-commit   # gitleaks, ver seção "Segurança"
 ├── user.nix               # dados pessoais, criptografado com git-crypt (template: user.nix.example)
 ├── home-common.nix        # Base home-manager: shell, git, neovim, starship, atuin, claude configs
@@ -41,7 +41,7 @@ nix/
 
 ## Convenções
 
-- Listas Homebrew (`casks`, `brews`) são **mergeadas automaticamente** pelo módulo system: cada módulo só declara o seu incremento, sem repetir o que já está no common
+- Listas Homebrew (`casks`, `brews`) são **mergeadas automaticamente** pelo módulo system: cada módulo só declara o seu incremento, sem repetir o que já está no common. Itens em ordem alfabética dentro de cada lista
 - Valores compartilhados entre os dois hosts em `flake.nix` são extraídos para o bloco `let` como variáveis nomeadas (ex: `hmBackupCommand`)
 - `nixpkgs.hostPlatform = "aarch64-darwin"` está em `common.nix`: vale para ambos os hosts
 - `specialArgs = { inherit self user; }` passa `self.rev` e dados do usuário aos módulos do sistema
@@ -60,6 +60,8 @@ nix/
 - `timestamp_timeout=15` só evita prompt repetido dentro do **mesmo terminal**: o default do sudo (`man 5 sudoers`) pra `timestamp_type` é `tty`, cache por terminal + session id, não só por tempo. Rodar `dr` em panes/abas diferentes (ex: herdr, tmux) pede senha de novo mesmo dentro da janela de 15 min. Pra cache único entre todas as sessões do usuário: `Defaults timestamp_type=global` no mesmo `security.sudo.extraConfig`. Trade-off: reduz isolamento por terminal
 - Pacote muito recente para estar no nixpkgs pinado (`nix search github:NixOS/nixpkgs/nixpkgs-26.05-darwin <pacote>` não retorna nada): preferir Homebrew formula em `brews` a manter um flake input de terceiro, o que evita overhead de pin próprio sem necessidade real
 - Antes de gerar completion de shell manualmente pra um binário instalado via cask, checar `brew info --cask <nome>`: muitos casks (ex: zed) já têm artefato "(Generated Completion)" e colocam o arquivo em `$(brew --prefix)/share/zsh/site-functions`, que já está no `$fpath` padrão, sem config nenhuma. Só vale gerar via Nix/activation script quando o cask não faz isso (caso do `docker-desktop`, que só empacota o completion estático dentro do `.app`, nunca exposto no `$fpath`)
+- Tap de terceiro: `taps` recebe só `user/repo` (2 partes; 3 partes dá `Invalid tap name`); o item vai em `casks` **ou** `brews` pelo nome completo `user/repo/item`. Doc com `brew install user/repo/x` não diz o tipo: conferir com `brew info user/repo/x` (ou `Casks/` vs `Formula/` no repo `user/homebrew-repo`) antes de declarar. Tipo errado: `No available formula` (ex: `docker/tap/sbx` é cask)
+- Homebrew 6 exige trust pra tap não oficial (`brew trust`, grava em `~/.homebrew/trust.json`, fora do Nix). No nix-darwin pinado, item em `casks`/`brews` com nome completo já sai `trusted: true` por default; tap tem `trusted = false` e só precisa de `{ name = "user/repo"; trusted = true; }` se usar nome curto. Conferir o Brewfile gerado: `nix eval --raw ./nix#darwinConfigurations.<Host>.config.homebrew.brewfile`
 
 ## Decisões arquiteturais
 
@@ -105,6 +107,7 @@ nix/
 ## Git / SSH
 
 - Após logout/reboot, o `ssh-agent` perde as identidades carregadas (`ssh-add -l` → "The agent has no identities"), bloqueando `git push`/`gh` sobre SSH até rodar `ssh-add ~/.ssh/id_ed25519` (pede a passphrase)
+- Sem identidade no agente, `git fetch` também falha e `origin/*` fica velho. Pra saber se um commit local já foi publicado, usar a API via HTTPS: `gh api repos/adrianofsantos/dotfiles/commits/<sha>` (HTTP 422 "No commit found" = só local)
 
 ## Nix: Gotchas
 
@@ -115,6 +118,7 @@ nix/
 - Para checar o default real de uma opção nix-darwin antes de alterá-la: `nix eval ~/repos/github/dotfiles/nix#darwinConfigurations.<Host>.options.<caminho>.default`. Para opções `extraConfig` (texto bruto, ex: `security.sudo.extraConfig`), esse default é sempre `null`: o comportamento real vem da ferramenta subjacente (ex: `man 5 sudoers` para `timestamp_timeout`, 5 min por default)
 - `nix flake check` não força avaliação de todo `config` (é lazy): erro de sintaxe numa lista/atributo (ex: vírgula sobrando em `fonts.packages`) pode passar despercebido. Pra forçar: `nix eval .#darwinConfigurations.<Host>.config.<caminho>`
 - `nix eval --raw` de um valor do tipo path (ex: `...home-manager.users.<user>.programs.git.hooks.pre-commit`) devolve o store path **sem** criá-lo no disco: `cat` dá "No such file". `nix-store --realise <path>` antes de ler, pra conferir o que o `dr` vai instalar
+- Nix instalado pelo instalador oficial (sem `/nix/receipt.json`, não é Determinate): upgrade de macOS pode restaurar `/etc/zshrc`/`/etc/bashrc`/`/etc/zshenv` (symlinks pra `/etc/static`) e `/etc/synthetic.conf`, tirando o Nix do PATH ou o `/nix` da montagem. Recuperar: `sudo /nix/var/nix/profiles/system/activate`. Antes do upgrade: Time Machine ok, `dr` em dia, cópia de `/etc/synthetic.conf` e `/etc/fstab`
 - Pra achar o arquivo fonte que define um pacote/atributo do nixpkgs (confirmar nome/existência antes de usar): `nix eval .#darwinConfigurations.<Host>.pkgs.<atributo>.meta.position` retorna `<store-path>/pkgs/.../default.nix:<linha>`, já baixado em `/nix/store`: dá pra `cat`/`ls` direto. Alternativa interativa: `nix repl`, `:lf .`, TAB-complete em `darwinConfigurations.<Host>.pkgs.<prefixo>`
 - `ls` é alias para `eza --icons` neste ambiente (zsh). `eza -d` com glob de trailing slash (`ls -td dir/*/`) ignora `-d` e lista o conteúdo do diretório em vez do diretório em si: quebra silenciosamente ao testar comandos interativamente via shell. Scripts `#!/usr/bin/env bash` não são afetados (não carregam `.zshrc`), mas testes interativos devem usar `command ls` para reproduzir o comportamento real do script
 
@@ -158,6 +162,8 @@ nix flake update --flake ~/repos/github/dotfiles/nix/
 ```
 
 `dr-build` builda sem ativar e deixa `./result` (out-link padrão do `nix build`; o script do darwin-rebuild só passa `--no-link` quando a ação não é `build`, então `dr`/`switch` nunca cria esse link). `result` está no `.gitignore`. `dr-review` (function em `home-common.nix`) builda, mostra `result/darwin-changes` e o diff de pacotes contra a geração ativa antes de você rodar `dr` de verdade: usar `nix store diff-closures /run/current-system ./result` (caminho explícito com `./`, `result` puro é lido como flake ref e falha).
+
+`dr` avalia o flake a partir do working tree da **branch atual** (inclui mudança não commitada em arquivo rastreado; arquivo novo não rastreado pelo git fica invisível até `git add`). Rodar `dr` em `main` não aplica o que só existe numa feature branch.
 
 ## Workflow de alterações
 
