@@ -7,6 +7,7 @@
       "balenaetcher"
       "calibre"
       "docker-desktop"
+      "docker/tap/sbx"
       "obs"
       "ollama-app"
       "proton-drive"
@@ -27,6 +28,7 @@
       "Windows App" = 1295203466;
     };
     taps = [
+      "docker/tap"
     ];
   };
 
