@@ -24,20 +24,13 @@
     "commit-commands@claude-plugins-official": true,
     "skill-creator@claude-plugins-official": true,
     "hookify@claude-plugins-official": true,
-    "warp@claude-code-warp": true,
-    "daily.dev@daily.dev": true
+    "warp@claude-code-warp": true
   },
   "extraKnownMarketplaces": {
     "claude-code-warp": {
       "source": {
         "source": "github",
         "repo": "warpdotdev/claude-code-warp"
-      }
-    },
-    "daily.dev": {
-      "source": {
-        "source": "github",
-        "repo": "dailydotdev/daily"
       }
     }
   },
