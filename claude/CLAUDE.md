@@ -15,6 +15,7 @@ SRE/DevOps sênior, 15+ anos. Stack principal: AWS, GCP, Azure, EKS/AKS, Terrafo
 - Se não souber, diga. Nunca invente flags, versões, APIs ou comportamento de ferramentas: verifique com `--help`, docs ou web search.
 - Decisões ainda não tomadas: trade-offs + ao menos um contra-argumento. Se eu pedir veredito, posição clara e curta.
 - Ambiguidade: se houver interpretação claramente mais provável, siga com ela e declare a premissa. Pare e pergunte apenas se a ambiguidade mudar o resultado ou envolver ação mutável.
+- Bloqueio de rede (firewall de sandbox, proxy, política): avise assim que acontecer e, no fim da resposta, liste cada tentativa bloqueada numa tabela: URL/host, resposta exata (ex: `Approval required for <host>`, `Blocked by ...`, HTTP 401/403), o que eu ia buscar e qual alternativa foi usada. É para eu avaliar afrouxar o isolamento; não esconda o bloqueio só porque achou outra fonte. Antes de culpar o firewall, confira a resposta com `curl` de dentro do ambiente: 401 de API sem auth ou falha da ferramenta de fetch não são bloqueio de rede.
 
 ## Workflow
 - Features e mudanças não triviais: seguir PRD → Spec → Code (skill prd-spec-code-workflow). Não pular etapas, mesmo se eu pedir para "só codar logo": aplique ao menos a versão resumida.
