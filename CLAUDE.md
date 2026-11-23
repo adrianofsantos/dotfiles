@@ -13,7 +13,7 @@ Dois hosts Apple Silicon: **Aang** (MacBook Air, uso secundário) e **Kyoshi** (
 ├── bpytop/         # config bpytop: symlink via mkOutOfStoreSymlink
 ├── ghostty/        # config do Ghostty: symlink via mkOutOfStoreSymlink, ver seção "Ghostty"
 ├── raycast/        # extensions/scripts do Raycast
-├── sbx/            # bootstrap.sh: CLAUDE.md global + gitleaks + hook dentro de sandbox Docker (sbx)
+├── sbx/            # bootstrap.sh: CLAUDE.md global + gitleaks + hook + plugins + statusline dentro de sandbox Docker (sbx)
 ├── bat/themes/     # tema custom do bat
 ├── starship.toml   # prompt do shell
 └── README.md       # guia canônico de bootstrap (setup em máquina nova)
@@ -34,6 +34,7 @@ nix/
 │   ├── aang.nix           # Dock + masApps exclusivos (iWork, GarageBand, iMovie); sem casks/brews próprios
 │   └── kyoshi.nix         # Dock + casks + brews + taps exclusivos (docker, sbx, steam, homelab tools)
 ├── git-hooks/pre-commit   # gitleaks, ver seção "Segurança"
+├── nix.conf               # rastreado mas não referenciado por nenhum módulo: editar não muda nada
 ├── user.nix               # dados pessoais, criptografado com git-crypt (template: user.nix.example)
 ├── home-common.nix        # Base home-manager: shell, git, neovim, starship, atuin, claude configs
 ├── home-aang.nix          # imports home-common (sem lazydocker, sem docker completions)
@@ -75,14 +76,21 @@ nix/
 
 - `claude/CLAUDE.md`, cada skill (diretório `claude/skills/<nome>/` inteiro), `claude/settings.json` e `claude/statusline-command.sh` têm um `home.file` individual no `home-common.nix` via `mkOutOfStoreSymlink`: alterações nos arquivos fonte têm efeito imediato sem `dr`
 - `claude/CLAUDE.md` é o global CLAUDE.md (`~/.claude/CLAUDE.md`): preferências verdadeiramente globais (persona, idioma, comunicação, git, safety rules), carregado sempre em toda conversa/projeto. Editado com frequência direto pelo usuário fora de PR, então conferir o arquivo em vez de assumir conteúdo específico
-- Sandbox Docker (sbx): o `~/.claude/CLAUDE.md` do sandbox é gerado pelo sbx (bloco `sbx:guidance`, relevante para o ambiente) e não traz o global; o `core.hooksPath` do host também não vem, então não há hook de pre-commit. `sbx/bootstrap.sh` (rodar **dentro** do sandbox, idempotente) resolve os dois: acrescenta `@<repo>/claude/CLAUDE.md` depois do `<!-- sbx:guidance end -->`, instala `gitleaks` via apt e aponta `core.hooksPath` global pro `nix/git-hooks` do repo (hook ao vivo, sem cópia). Exige o dotfiles montado como workspace, no mesmo caminho absoluto do host (`:ro` em sandbox de outro projeto; `~` no sandbox é `/home/agent`). Tudo isso vive no sandbox: rodar de novo se ele for recriado. Validar o CLAUDE.md com um processo novo: `cd /tmp && claude -p "cite a regra sobre travessão do seu CLAUDE.md"`
+- Sandbox Docker (sbx): o sbx gera `~/.claude/CLAUDE.md` (bloco `sbx:guidance`, relevante pro ambiente) e `~/.claude/settings.json` próprios, sem nada do host: sem CLAUDE.md global, plugins, statusline nem `core.hooksPath`. `sbx/bootstrap.sh` (rodar **dentro** do sandbox, idempotente) resolve:
+  1. `@<repo>/claude/CLAUDE.md` depois do `<!-- sbx:guidance end -->`
+  2. `gitleaks` via apt + `core.hooksPath` global pro `nix/git-hooks` do repo (hook ao vivo, sem cópia)
+  3. plugins com `true` em `enabledPlugins` do `claude/settings.json`, mais os `extraKnownMarketplaces`
+  4. `statusLine` → `sbx/statusline.sh`: o do sbx (`sbx-claude-hook claude-status`) só reporta ao app do Docker e não imprime nada; o wrapper repassa o JSON a ele e ao `claude/statusline-command.sh`
+
+  Exige o dotfiles montado no mesmo caminho absoluto do host (`:ro` em sandbox de outro projeto; `~` ali é `/home/agent`). Vive no sandbox: rodar de novo se ele for recriado. Vale na próxima sessão; validar com processo novo: `cd /tmp && claude -p "cite a regra sobre travessão do seu CLAUDE.md"`
+- Sandbox, gotchas: `! <cmd>` no prompt roda **dentro** do sandbox, não no Mac (comando de host vai no terminal do host). Origin é SSH e não há agente encaminhado: `git fetch` falha, usar `git ls-remote https://github.com/adrianofsantos/dotfiles`; `gh api` dá 401 (o proxy só injeta credencial no git HTTPS). A imagem não tem `hostname`, `file`, `strings` nem `shellcheck` (scripts do repo que rodam lá precisam de fallback). `sed -i` no workspace (virtiofs) zerou o bit de execução de um script: conferir `git ls-files -s` (100755) antes de commitar
 - `claude/skills/prd-spec-code-workflow/SKILL.md` é o workflow Pesquisa→Spec→Code (`~/.claude/skills/prd-spec-code-workflow/SKILL.md`): carrega sob demanda quando o pedido do usuário bate com a `description` da skill (novo módulo, PRD/spec, mudança de contrato), não em toda conversa. Extraído do CLAUDE.md global para economizar tokens em tarefas triviais; trade-off: ativação depende de matching semântico, não é garantida
 - Nova skill pessoal: arquivo em `claude/skills/<nome>/SKILL.md` + `home.file.".claude/skills/<nome>"` em `home-common.nix` apontando pro **diretório** (mesmo padrão `mkOutOfStoreSymlink` + `force = true` do `claude/CLAUDE.md`). Linkar o diretório, não o `SKILL.md`: o `sbx skills import` segue symlink só no nível do diretório da skill e pula symlink dentro dela (a skill chega vazia no sandbox). Trocar link de arquivo por link de diretório numa skill existente: o `dr` falha com `cannot overwrite directory`, precisa remover o diretório real antes (`rm` do `SKILL.md` antigo + `rmdir`)
 - Skills no sandbox são **cópia**, não link: depois de editar uma skill no repo, rodar `sbx skills import --force` no host pra atualizar os sandboxes
 - `claude/settings.json` e `claude/statusline-command.sh` são públicos no repositório: não incluir tokens, chaves ou dados pessoais nesses arquivos
 - Após bootstrap: rodar `claude` para autenticar via browser antes de usar
 - Plugins em `~/.claude/plugins/installed_plugins.json` com `"scope": "project"` presos a um `projectPath` que não bate com o diretório atual não carregam, mesmo com `enabledPlugins: true` no `settings.json`. Corrigir via `/plugin` (reinstalar como `user` scope, igual ao plugin `warp`) e rodar `/reload-plugins` para aplicar
-- Testar `claude/statusline-command.sh` localmente sem sessão real: `echo '{"workspace":{"current_dir":"..."},"model":{"display_name":"..."}}' | bash claude/statusline-command.sh`. Campos ausentes no JSON devem degradar graciosamente (a maioria dos campos do schema do Claude Code, como `rate_limits` e `prompt_cache`, só aparece depois da primeira resposta da API ou para contas Pro/Max)
+- Testar `claude/statusline-command.sh` localmente sem sessão real: `echo '{"workspace":{"current_dir":"..."},"model":{"display_name":"..."}}' | bash claude/statusline-command.sh` (no sandbox, o mesmo JSON em `bash sbx/statusline.sh`). Campos ausentes no JSON devem degradar graciosamente (a maioria dos campos do schema do Claude Code, como `rate_limits` e `prompt_cache`, só aparece depois da primeira resposta da API ou para contas Pro/Max)
 
 ## Ghostty
 
@@ -107,11 +115,12 @@ nix/
 - Sem pinentry: `git commit` falha com `gpg: signing failed: No pinentry`
 - Após alterar gpg-agent: logout/login obrigatório (agente antigo continua na sessão)
 - Se `gpg-agent.conf` estiver ausente (não só desatualizado), recriar o arquivo e rodar `gpgconf --kill gpg-agent` resolve sem logout/login: o agente sobe de novo sob demanda já lendo a config nova
+- Sandbox sbx: chave GPG nunca chega lá (doc do sbx), então commit feito no sandbox sai **sem assinatura**. Caminho suportado pelo sbx é assinatura SSH via agent forwarding (`gpg.format ssh`), ainda não adotado aqui
 
 ## Git / SSH
 
 - Após logout/reboot, o `ssh-agent` perde as identidades carregadas (`ssh-add -l` → "The agent has no identities"), bloqueando `git push`/`gh` sobre SSH até rodar `ssh-add ~/.ssh/id_ed25519` (pede a passphrase)
-- Sem identidade no agente, `git fetch` também falha e `origin/*` fica velho. Pra saber se um commit local já foi publicado, usar a API via HTTPS: `gh api repos/adrianofsantos/dotfiles/commits/<sha>` (HTTP 422 "No commit found" = só local)
+- Sem identidade no agente, `git fetch` também falha e `origin/*` fica velho. Pra saber se um commit local já foi publicado, usar a API via HTTPS: `gh api repos/adrianofsantos/dotfiles/commits/<sha>` (HTTP 422 "No commit found" = só local). No sandbox sbx o `gh api` dá 401: comparar com `git ls-remote https://github.com/adrianofsantos/dotfiles <branch>`
 
 ## Nix: Gotchas
 

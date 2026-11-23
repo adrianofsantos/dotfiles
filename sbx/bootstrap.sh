@@ -7,6 +7,10 @@
 #   2. Instala o gitleaks (apt)
 #   3. Aponta core.hooksPath global pro nix/git-hooks deste repo, o mesmo
 #      hook de pre-commit que o home-manager aplica no macOS
+#   4. Instala os plugins do Claude Code habilitados no claude/settings.json
+#      do repo (e os marketplaces extras que eles exigem)
+#   5. Troca o statusLine do sandbox por sbx/statusline.sh, que mantém o
+#      hook do sbx e desenha o statusline do repo
 #
 # Requisito: o dotfiles montado no sandbox (workspace principal ou extra
 # `:ro`), no mesmo caminho absoluto do host. O caminho é derivado da
@@ -59,4 +63,52 @@ else
   log "git: core.hooksPath = $HOOKS_DIR"
 fi
 
-log "ok. CLAUDE.md vale a partir da próxima sessão do claude."
+# 4. plugins do Claude Code: o settings.json do sandbox é gerado pelo sbx e
+# não traz enabledPlugins/extraKnownMarketplaces do host. A lista sai do
+# claude/settings.json do repo (marketplaces extras + plugins com true).
+# Falha num plugin não aborta o resto: só avisa.
+REPO_SETTINGS="$DOTFILES_DIR/claude/settings.json"
+KNOWN_MKT="$HOME/.claude/plugins/known_marketplaces.json"
+SANDBOX_SETTINGS="$HOME/.claude/settings.json"
+if ! command -v claude &>/dev/null || ! command -v jq &>/dev/null; then
+  log "plugins: claude ou jq ausente, pulando"
+else
+  while IFS=$'\t' read -r name repo; do
+    if jq -e --arg n "$name" 'has($n)' "$KNOWN_MKT" &>/dev/null; then
+      log "plugins: marketplace $name já presente"
+    elif claude plugin marketplace add "$repo" >/dev/null 2>&1; then
+      log "plugins: marketplace $name adicionado ($repo)"
+    else
+      log "plugins: AVISO, falha ao adicionar marketplace $name ($repo)"
+    fi
+  done < <(jq -r '.extraKnownMarketplaces // {} | to_entries[]
+                  | select(.value.source.source == "github")
+                  | [.key, .value.source.repo] | @tsv' "$REPO_SETTINGS")
+
+  while read -r plugin; do
+    if jq -e --arg p "$plugin" '.enabledPlugins[$p] == true' "$SANDBOX_SETTINGS" &>/dev/null; then
+      log "plugins: $plugin já instalado"
+    elif out="$(claude plugin install "$plugin" --scope user 2>&1)"; then
+      log "plugins: $plugin instalado"
+    else
+      log "plugins: AVISO, $plugin falhou: $(tail -n1 <<<"$out")"
+    fi
+  done < <(jq -r '.enabledPlugins // {} | to_entries[] | select(.value == true) | .key' "$REPO_SETTINGS")
+fi
+
+# 5. statusLine: o do sbx (sbx-claude-hook claude-status) não desenha nada no
+# terminal. sbx/statusline.sh chama o hook do sbx e o statusline do repo.
+STATUSLINE_CMD="bash $DOTFILES_DIR/sbx/statusline.sh"
+if ! command -v jq &>/dev/null; then
+  log "statusLine: jq ausente, pulando"
+elif jq -e --arg c "$STATUSLINE_CMD" '.statusLine.command == $c' "$SANDBOX_SETTINGS" &>/dev/null; then
+  log "statusLine: já configurado"
+else
+  tmp="$(mktemp)"
+  jq --arg c "$STATUSLINE_CMD" '.statusLine = {type: "command", command: $c}' "$SANDBOX_SETTINGS" > "$tmp"
+  cat "$tmp" > "$SANDBOX_SETTINGS"  # escreve no lugar: preserva modo/dono (mv herdaria o 600 do mktemp)
+  rm -f "$tmp"
+  log "statusLine: $STATUSLINE_CMD"
+fi
+
+log "ok. CLAUDE.md, plugins e statusLine valem a partir da próxima sessão do claude."
