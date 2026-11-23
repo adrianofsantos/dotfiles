@@ -91,7 +91,8 @@ nix/
 
 - Hook de pre-commit (gitleaks, bloqueia commits com secrets) é declarativo via `programs.git.hooks.pre-commit` em `home-common.nix`, apontando pra `nix/git-hooks/pre-commit`. Aplicado globalmente (`core.hooksPath` em `~/.config/git/config`, vale pra todo repo na máquina) no próximo `dr`: sem passo manual de bootstrap
 - Diferente de `claude/CLAUDE.md`/`nvim/` (symlink direto ou via `mkOutOfStoreSymlink`), `programs.git.hooks` copia o arquivo pro Nix store na avaliação: editar `nix/git-hooks/pre-commit` exige `dr` pra ter efeito, não é instantâneo
-- Validar commits já feitos (o hook só pega o que passa por ele, ex: commit de outra sessão): `gitleaks git --log-opts="main..HEAD" --no-banner`
+- `gitleaks git --pre-commit` **sem** `--staged` escaneia só o `git diff` (mudanças não staged): dentro do hook, com tudo já em `git add`, varre 0 bytes e nunca bloqueia nada (o hook ficou assim até 2026-11). O hook usa `--pre-commit --staged --redact`; `--redact` evita que o `-v` imprima o secret no terminal. Testar mudança no hook com um token falso num repo descartável: o commit tem que sair com exit 1
+- Validar commits já feitos (o hook só pega o que passa por ele, ex: commit de outra sessão): `gitleaks git --log-opts="main..HEAD" --no-banner`. Como o hook não bloqueava nada até 2026-11, vale rodar uma vez em todo o histórico dos repos: `gitleaks git --no-banner --redact`
 - `nix/user.nix` está criptografado com git-crypt: ao clonar em máquina nova rodar `git-crypt unlock` após configurar a chave GPG
 - Antes de `git-crypt add-gpg-user`, definir confiança GPG: `gpg --fingerprint --with-colons <KEY_ID> | awk -F: '/^fpr/{print $10":6:"}' | gpg --import-ownertrust`
 - `nix/user.nix.example` existe como template público: `user.nix` real nunca aparece em plaintext no repositório remoto
