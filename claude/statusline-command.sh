@@ -10,7 +10,9 @@ used=$(echo "$input" | jq -r '.context_window.used_percentage // empty')
 
 # --- User & host ---
 user=$(whoami)
-host=$(hostname -s)
+# hostname não existe em toda imagem Linux (ex: sandbox sbx): cai pro uname -n
+host=$(hostname -s 2>/dev/null || uname -n)
+host=${host%%.*}
 
 # --- Directory: truncate to last 3 segments (mirrors Starship truncation_length=3) ---
 dir_display=$(echo "$cwd" | awk -F'/' '{

@@ -9,6 +9,8 @@
 #      hook de pre-commit que o home-manager aplica no macOS
 #   4. Instala os plugins do Claude Code habilitados no claude/settings.json
 #      do repo (e os marketplaces extras que eles exigem)
+#   5. Troca o statusLine do sandbox por sbx/statusline.sh, que mantém o
+#      hook do sbx e desenha o statusline do repo
 #
 # Requisito: o dotfiles montado no sandbox (workspace principal ou extra
 # `:ro`), no mesmo caminho absoluto do host. O caminho é derivado da
@@ -94,4 +96,19 @@ else
   done < <(jq -r '.enabledPlugins // {} | to_entries[] | select(.value == true) | .key' "$REPO_SETTINGS")
 fi
 
-log "ok. CLAUDE.md e plugins valem a partir da próxima sessão do claude."
+# 5. statusLine: o do sbx (sbx-claude-hook claude-status) não desenha nada no
+# terminal. sbx/statusline.sh chama o hook do sbx e o statusline do repo.
+STATUSLINE_CMD="bash $DOTFILES_DIR/sbx/statusline.sh"
+if ! command -v jq &>/dev/null; then
+  log "statusLine: jq ausente, pulando"
+elif jq -e --arg c "$STATUSLINE_CMD" '.statusLine.command == $c' "$SANDBOX_SETTINGS" &>/dev/null; then
+  log "statusLine: já configurado"
+else
+  tmp="$(mktemp)"
+  jq --arg c "$STATUSLINE_CMD" '.statusLine = {type: "command", command: $c}' "$SANDBOX_SETTINGS" > "$tmp"
+  cat "$tmp" > "$SANDBOX_SETTINGS"  # escreve no lugar: preserva modo/dono (mv herdaria o 600 do mktemp)
+  rm -f "$tmp"
+  log "statusLine: $STATUSLINE_CMD"
+fi
+
+log "ok. CLAUDE.md, plugins e statusLine valem a partir da próxima sessão do claude."
