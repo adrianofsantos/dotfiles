@@ -253,16 +253,16 @@ in
     source = config.lib.file.mkOutOfStoreSymlink "${user.dotfilesDir}/claude/CLAUDE.md";
     force = true;
   };
-  home.file.".claude/skills/prd-spec-code-workflow/SKILL.md" = {
-    source = config.lib.file.mkOutOfStoreSymlink "${user.dotfilesDir}/claude/skills/prd-spec-code-workflow/SKILL.md";
+  home.file.".claude/skills/prd-spec-code-workflow" = {
+    source = config.lib.file.mkOutOfStoreSymlink "${user.dotfilesDir}/claude/skills/prd-spec-code-workflow";
     force = true;
   };
-  home.file.".claude/skills/verify/SKILL.md" = {
-    source = config.lib.file.mkOutOfStoreSymlink "${user.dotfilesDir}/claude/skills/verify/SKILL.md";
+  home.file.".claude/skills/verify" = {
+    source = config.lib.file.mkOutOfStoreSymlink "${user.dotfilesDir}/claude/skills/verify";
     force = true;
   };
-  home.file.".claude/skills/track-issue/SKILL.md" = {
-    source = config.lib.file.mkOutOfStoreSymlink "${user.dotfilesDir}/claude/skills/track-issue/SKILL.md";
+  home.file.".claude/skills/track-issue" = {
+    source = config.lib.file.mkOutOfStoreSymlink "${user.dotfilesDir}/claude/skills/track-issue";
     force = true;
   };
   home.file.".claude/statusline-command.sh" = {

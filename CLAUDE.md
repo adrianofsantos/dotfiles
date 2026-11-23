@@ -13,6 +13,7 @@ Dois hosts Apple Silicon: **Aang** (MacBook Air, uso secundário) e **Kyoshi** (
 ├── bpytop/         # config bpytop: symlink via mkOutOfStoreSymlink
 ├── ghostty/        # config do Ghostty: symlink via mkOutOfStoreSymlink, ver seção "Ghostty"
 ├── raycast/        # extensions/scripts do Raycast
+├── sbx/            # bootstrap.sh: CLAUDE.md global + gitleaks + hook dentro de sandbox Docker (sbx)
 ├── bat/themes/     # tema custom do bat
 ├── starship.toml   # prompt do shell
 └── README.md       # guia canônico de bootstrap (setup em máquina nova)
@@ -72,10 +73,12 @@ nix/
 
 ## Claude Code
 
-- `claude/CLAUDE.md`, cada skill em `claude/skills/<nome>/SKILL.md`, `claude/settings.json` e `claude/statusline-command.sh` têm um `home.file` individual no `home-common.nix` via `mkOutOfStoreSymlink`: alterações nos arquivos fonte têm efeito imediato sem `dr`
+- `claude/CLAUDE.md`, cada skill (diretório `claude/skills/<nome>/` inteiro), `claude/settings.json` e `claude/statusline-command.sh` têm um `home.file` individual no `home-common.nix` via `mkOutOfStoreSymlink`: alterações nos arquivos fonte têm efeito imediato sem `dr`
 - `claude/CLAUDE.md` é o global CLAUDE.md (`~/.claude/CLAUDE.md`): preferências verdadeiramente globais (persona, idioma, comunicação, git, safety rules), carregado sempre em toda conversa/projeto. Editado com frequência direto pelo usuário fora de PR, então conferir o arquivo em vez de assumir conteúdo específico
+- Sandbox Docker (sbx): o `~/.claude/CLAUDE.md` do sandbox é gerado pelo sbx (bloco `sbx:guidance`, relevante para o ambiente) e não traz o global; o `core.hooksPath` do host também não vem, então não há hook de pre-commit. `sbx/bootstrap.sh` (rodar **dentro** do sandbox, idempotente) resolve os dois: acrescenta `@<repo>/claude/CLAUDE.md` depois do `<!-- sbx:guidance end -->`, instala `gitleaks` via apt e aponta `core.hooksPath` global pro `nix/git-hooks` do repo (hook ao vivo, sem cópia). Exige o dotfiles montado como workspace, no mesmo caminho absoluto do host (`:ro` em sandbox de outro projeto; `~` no sandbox é `/home/agent`). Tudo isso vive no sandbox: rodar de novo se ele for recriado. Validar o CLAUDE.md com um processo novo: `cd /tmp && claude -p "cite a regra sobre travessão do seu CLAUDE.md"`
 - `claude/skills/prd-spec-code-workflow/SKILL.md` é o workflow Pesquisa→Spec→Code (`~/.claude/skills/prd-spec-code-workflow/SKILL.md`): carrega sob demanda quando o pedido do usuário bate com a `description` da skill (novo módulo, PRD/spec, mudança de contrato), não em toda conversa. Extraído do CLAUDE.md global para economizar tokens em tarefas triviais; trade-off: ativação depende de matching semântico, não é garantida
-- Nova skill pessoal: arquivo em `claude/skills/<nome>/SKILL.md` + `home.file` correspondente em `home-common.nix` (mesmo padrão `mkOutOfStoreSymlink` + `force = true` do `claude/CLAUDE.md`)
+- Nova skill pessoal: arquivo em `claude/skills/<nome>/SKILL.md` + `home.file.".claude/skills/<nome>"` em `home-common.nix` apontando pro **diretório** (mesmo padrão `mkOutOfStoreSymlink` + `force = true` do `claude/CLAUDE.md`). Linkar o diretório, não o `SKILL.md`: o `sbx skills import` segue symlink só no nível do diretório da skill e pula symlink dentro dela (a skill chega vazia no sandbox). Trocar link de arquivo por link de diretório numa skill existente: o `dr` falha com `cannot overwrite directory`, precisa remover o diretório real antes (`rm` do `SKILL.md` antigo + `rmdir`)
+- Skills no sandbox são **cópia**, não link: depois de editar uma skill no repo, rodar `sbx skills import --force` no host pra atualizar os sandboxes
 - `claude/settings.json` e `claude/statusline-command.sh` são públicos no repositório: não incluir tokens, chaves ou dados pessoais nesses arquivos
 - Após bootstrap: rodar `claude` para autenticar via browser antes de usar
 - Plugins em `~/.claude/plugins/installed_plugins.json` com `"scope": "project"` presos a um `projectPath` que não bate com o diretório atual não carregam, mesmo com `enabledPlugins: true` no `settings.json`. Corrigir via `/plugin` (reinstalar como `user` scope, igual ao plugin `warp`) e rodar `/reload-plugins` para aplicar
