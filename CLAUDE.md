@@ -42,7 +42,7 @@ nix/
 ## Convenções
 
 - Listas Homebrew (`casks`, `brews`) são **mergeadas automaticamente** pelo módulo system: cada módulo só declara o seu incremento, sem repetir o que já está no common. Itens em ordem alfabética dentro de cada lista
-- Valores compartilhados entre os dois hosts em `flake.nix` são extraídos para o bloco `let` como variáveis nomeadas (ex: `hmBackupCommand`)
+- Valores compartilhados entre os dois hosts em `flake.nix` são extraídos para o bloco `let` como variáveis nomeadas (ex: `hmBackupExt`)
 - `nixpkgs.hostPlatform = "aarch64-darwin"` está em `common.nix`: vale para ambos os hosts
 - `specialArgs = { inherit self user; }` passa `self.rev` e dados do usuário aos módulos do sistema
 - `extraSpecialArgs = { inherit user; }` passa os mesmos dados aos módulos do home-manager
@@ -127,14 +127,15 @@ nix/
 
 - Todo `home.file` ou `xdg.configFile` deve declarar `force` explicitamente, mesmo que seja o valor default (`false`). Valores que diferem do default devem ser declarados sem exceção.
 - Arquivos gerenciados via `mkOutOfStoreSymlink` apontando para o repositório git usam `force = true`: a fonte de verdade está no git, não há nada a preservar no arquivo avulso.
-- `backupCommand` está configurado globalmente no `flake.nix` para ambos os hosts: arquivos com `force = false` que colidiriam são renomeados para `.bak` e uma linha é impressa no terminal durante o `dr`. Arquivos com `force = true` sobrescrevem diretamente sem backup.
+- `backupFileExtension = "bak"` está configurado globalmente no `flake.nix` para ambos os hosts: no `dr`, qualquer alvo que já existe e não é symlink (arquivo **ou diretório**) é renomeado para `.bak` antes do link ser criado. No home-manager pinado o script de link (`modules/files.nix`) faz o backup independente de `force`; `force = true` só pula a checagem prévia de colisão
+- Não usar `backupCommand` com sintaxe de shell: o home-manager roda `run $HOME_MANAGER_BACKUP_COMMAND "$targetPath"` sem aspas, então só aceita um executável (ex: `"${pkgs.trash-cli}/bin/trash"`). O antigo `hmBackupCommand` (`f="$1"; mv ...`) falhava com `f="$1";: command not found` toda vez que era acionado; descoberto em 2026-11 ao trocar o link de skill de arquivo pra diretório (`ln: cannot overwrite directory`)
 - `programs.zsh.syntaxHighlighting` é submodule, não bool: `enable`, `package`, `highlighters`, `patterns` (`ZSH_HIGHLIGHT_PATTERNS`, glob literal por comando), `styles` (`ZSH_HIGHLIGHT_STYLES`, ex: `styles.path = "fg=#89b4fa,underline"`). Estilo default do highlighter `main` pra path válido é só `underline`, sem cor
 - `home.activation.<nome> = lib.hm.dag.entryAfter [...] "..."` roda shell script no `dr`. Helpers reais disponíveis (verificados em `lib/bash/home-manager.sh` do home-manager pinado): `run <cmd>` (já trata dry-run internamente, fazendo `echo "$@"` em vez de executar) e `_i "msg"` (log). Cuidado: `run <cmd> > arquivo` quebra em dry-run, porque o `echo` do `run` também é capturado pelo redirect, escrevendo o texto do comando dentro do arquivo em vez de nada. Pra scripts que redirecionam output, checar `[[ -v DRY_RUN ]]` explicitamente antes, não depender do `run`. Exemplo: `home.activation.dockerCompletions` em `home-kyoshi.nix`
 
 ## home-manager: Gotchas
 
-- Se um arquivo já existe no sistema e o home-manager tenta gerenciá-lo sem `force = true` e sem `backupCommand` configurado, o rebuild falha com `would be clobbered`
-- Arquivos `.bak` gerados pelo `backupCommand` podem ser removidos com segurança após confirmar que o `dr` criou o symlink corretamente
+- Se um arquivo já existe no sistema e o home-manager tenta gerenciá-lo sem `force = true` e sem `backupFileExtension`/`backupCommand` configurado, o rebuild falha com `would be clobbered`
+- Arquivos `.bak` gerados pelo backup podem ser removidos com segurança após confirmar que o `dr` criou o symlink corretamente
 - `programs.git.hooks` seta `core.hooksPath` **globalmente** (`~/.config/git/config`), valendo pra todo repo na máquina, não só o repo declarante. Pra escopar a um repo específico, usar `programs.git.includes` com `condition = "gitdir:<path>"` e `contents.core.hooksPath` apontando pro hook
 - `programs.zsh.initContent` do usuário (valor sem wrapper) renderiza em `mkOrder 1000`; `shellAliases` vira `alias ...` só depois, em `mkOrder 1100` (conferido no source do home-manager pinado). Uma `function` declarada no `initContent` não pode chamar um alias pelo nome: o zsh expande aliases no *parse* da function, não a cada chamada, então o alias ainda não existe e a function fica travada chamando um comando inexistente (testado: `command not found`). Repetir o comando raw dentro da function, não depender do alias.
 - Antes de symlinkar o diretório de config de um app **por inteiro** (`xdg.configFile."app" = { source = mkOutOfStoreSymlink ...; }`, não um arquivo único), verificar se o app grava cache ou estado de runtime lá dentro. Achado em 2026-10: `raycast/node-compile-cache/` (bytecode V8 do Node, chave por versão/arch) e `raycast/aster-endpoint.json` (token de IPC local) foram commitados por engano junto com config real, o segundo chegou a vazar publicamente no GitHub (purgado via `git filter-repo`, ver `.gitignore`). Adicionar esses caminhos ao `.gitignore` **antes** do primeiro commit do diretório, não depois
