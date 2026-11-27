@@ -41,7 +41,6 @@ in
     kubectx
     lazygit
     neovim
-    ov
     ripgrep
     tree
     wget

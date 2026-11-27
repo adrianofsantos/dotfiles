@@ -1,7 +1,8 @@
 # Config do ov (pager): ~/.config/ov/config.yaml via mkOutOfStoreSymlink.
-# Referência completa (keybindings, estilos, modes) na versão do nixpkgs
-# pinado: https://github.com/noborus/ov/blob/v0.51.1/ov.yaml
-# Keybindings estilo less: https://github.com/noborus/ov/blob/v0.51.1/ov-less.yaml
+# ov vem do Homebrew (brews em common.nix), sempre na última versão.
+# Referência completa (keybindings, estilos, modes): `ov --generate-config`
+# ou https://github.com/noborus/ov/blob/master/ov.yaml
+# Keybindings estilo less: `ov --generate-config=less`
 
 # man formata negrito/sublinhado por overstrike (backspace). Sem estas duas
 # chaves o ov não aplica estilo nenhum: o NewConfig() do ov não define default.
