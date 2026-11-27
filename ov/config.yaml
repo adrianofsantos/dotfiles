@@ -1,0 +1,12 @@
+# Config do ov (pager): ~/.config/ov/config.yaml via mkOutOfStoreSymlink.
+# Referência completa (keybindings, estilos, modes) na versão do nixpkgs
+# pinado: https://github.com/noborus/ov/blob/v0.51.1/ov.yaml
+# Keybindings estilo less: https://github.com/noborus/ov/blob/v0.51.1/ov-less.yaml
+
+# man formata negrito/sublinhado por overstrike (backspace). Sem estas duas
+# chaves o ov não aplica estilo nenhum: o NewConfig() do ov não define default.
+# Só valem no nível raiz, não dentro de Mode.
+StyleOverStrike:
+  Bold: true
+StyleOverLine:
+  Underline: true

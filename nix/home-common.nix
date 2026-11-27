@@ -41,6 +41,7 @@ in
     kubectx
     lazygit
     neovim
+    ov
     ripgrep
     tree
     wget
@@ -133,6 +134,9 @@ in
     sessionVariables = {
       EDITOR = "nvim";
       VISUAL = "nvim";
+      # Pager padrão de quem lê $PAGER sem config própria (man, gh, ...).
+      # bat e git têm config própria abaixo, com -F (sai se couber na tela).
+      PAGER = "ov";
       NIX_CONF_DIR = "$HOME/.config/nix";
     };
 
@@ -209,6 +213,11 @@ in
       pull.rebase = true;
       push.autoSetupRemote = true;
       core.editor = "nvim";
+      # -F: sai direto se couber numa tela (o git só seta LESS=FRX pro less).
+      # Seções por arquivo no diff e por commit no log: space/^ navegam.
+      core.pager = "ov -F";
+      pager.diff = "ov -F --section-delimiter '^diff'";
+      pager.log = "ov -F --section-delimiter '^commit' --section-header-num 3";
     };
     hooks = {
       pre-commit = ./git-hooks/pre-commit;
@@ -227,10 +236,17 @@ in
   programs.bat = {
     enable = true;
     config.theme = "Catppuccin-frappe";
+    # bat só injeta flags (-R -F) quando o pager é less; pro ov, -F explícito.
+    config.pager = "ov -F";
     syntaxes = {};
   };
   xdg.configFile."bat/themes" = {
     source = config.lib.file.mkOutOfStoreSymlink "${user.dotfilesDir}/bat/themes";
+    force = true;
+  };
+
+  xdg.configFile."ov/config.yaml" = {
+    source = config.lib.file.mkOutOfStoreSymlink "${user.dotfilesDir}/ov/config.yaml";
     force = true;
   };
 
