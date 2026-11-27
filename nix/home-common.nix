@@ -133,6 +133,14 @@ in
     sessionVariables = {
       EDITOR = "nvim";
       VISUAL = "nvim";
+      # Pager padrão de quem lê $PAGER sem config própria (gh, ...).
+      # bat e git têm config própria abaixo, com -F (sai se couber na tela).
+      # Recomendações de integração: https://noborus.github.io/ov/
+      PAGER = "ov";
+      # Seção = linha que não começa com espaço (NAME, SYNOPSIS, ...), fixa no
+      # topo enquanto rola. Sem --sidebar-mode=sections: o man formata na
+      # largura toda e a sidebar (20%) cortaria o texto; alt+u abre sob demanda.
+      MANPAGER = "ov --section-delimiter '^[^\\s]' --section-header";
       NIX_CONF_DIR = "$HOME/.config/nix";
     };
 
@@ -209,6 +217,13 @@ in
       pull.rebase = true;
       push.autoSetupRemote = true;
       core.editor = "nvim";
+      # -F: sai direto se couber numa tela (o git só seta LESS=FRX pro less).
+      # Seções por arquivo no diff e por commit no log: space/^ navegam.
+      core.pager = "ov -F";
+      # --section-header mantém o nome do arquivo no topo enquanto rola.
+      pager.diff = "ov -F --section-delimiter '^diff' --section-header";
+      pager.log = "ov -F --section-delimiter '^commit' --section-header-num 3";
+      pager.show = "ov -F --header 3";
     };
     hooks = {
       pre-commit = ./git-hooks/pre-commit;
@@ -227,10 +242,20 @@ in
   programs.bat = {
     enable = true;
     config.theme = "Catppuccin-frappe";
+    # bat só injeta flags (-R -F) quando o pager é less; pro ov, -F explícito.
+    # -H3 fixa o cabeçalho do bat (borda + "File: ..." + borda) no topo.
+    # wrap=never: quem quebra linha é o ov; quebrada pelo bat não desfaz.
+    config.pager = "ov -F -H3";
+    config.wrap = "never";
     syntaxes = {};
   };
   xdg.configFile."bat/themes" = {
     source = config.lib.file.mkOutOfStoreSymlink "${user.dotfilesDir}/bat/themes";
+    force = true;
+  };
+
+  xdg.configFile."ov/config.yaml" = {
+    source = config.lib.file.mkOutOfStoreSymlink "${user.dotfilesDir}/ov/config.yaml";
     force = true;
   };
 

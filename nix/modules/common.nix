@@ -40,6 +40,7 @@
       "herdr"
       "mas"
       "ncdu"
+      "ov"
       "pinentry-mac"
       "rclone"
       "watch"
