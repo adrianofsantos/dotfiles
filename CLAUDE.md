@@ -12,7 +12,7 @@ Dois hosts Apple Silicon: **Aang** (MacBook Air, uso secundário) e **Kyoshi** (
 ├── nvim/           # config Neovim/LazyVim: symlink via mkOutOfStoreSymlink, requer `dr` pra ter efeito
 ├── bpytop/         # config bpytop: symlink via mkOutOfStoreSymlink
 ├── ghostty/        # config do Ghostty: symlink via mkOutOfStoreSymlink, ver seção "Ghostty"
-├── ov/             # config do ov (pager no lugar do less: $PAGER, bat, git): symlink via mkOutOfStoreSymlink. StyleOverStrike/StyleOverLine são obrigatórios pro negrito/sublinhado do man
+├── ov/             # config do ov (pager no lugar do less: $PAGER, $MANPAGER, bat, git; flags seguem https://noborus.github.io/ov/): symlink via mkOutOfStoreSymlink. StyleOverStrike/StyleOverLine são obrigatórios pro negrito/sublinhado do man
 ├── raycast/        # extensions/scripts do Raycast
 ├── sbx/            # bootstrap.sh: CLAUDE.md global + gitleaks + hook + plugins + statusline dentro de sandbox Docker (sbx)
 ├── bat/themes/     # tema custom do bat
